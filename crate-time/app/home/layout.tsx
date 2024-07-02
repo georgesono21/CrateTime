@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import SessionProvider from "@/components/SessionProvider";
 import { getServerSession } from "next-auth";
-import "./globals.css";
+import "../globals.css";
 import NavBar from "@/components/NavBar";
+import { redirect } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,14 +20,8 @@ export default async function RootLayout({
 }>) {
 	const session = await getServerSession();
 
-	return (
-		<html lang="en">
-			<SessionProvider>
-				<body className={inter.className}>
-					<NavBar />
-					{children}
-				</body>
-			</SessionProvider>
-		</html>
-	);
+	if (!session) {
+		redirect("/");
+	}
+	return <div className={inter.className}>{children}</div>;
 }
