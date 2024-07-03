@@ -12,11 +12,10 @@ function page() {
 		redirect("/home");
 	}
 	return (
-		<div>
-			<h1>CrateTime</h1>
-			<p>
+		<div className="min-h-screen bg-base-300 text-center">
+			<h1 className="lg:text-3xl text-xl py-10">
 				Welcome to CrateTime, a pet management app for your family or house!
-			</p>
+			</h1>
 			<Signin text={"Login/Signup"} />
 		</div>
 	);

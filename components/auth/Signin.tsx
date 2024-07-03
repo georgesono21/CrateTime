@@ -8,10 +8,12 @@ function signInAndRedirect(): void {
 }
 
 export default ({ text }: { text: string }) => (
-	<button
-		className="btn btn-ghost text-xl text-center"
-		onClick={() => signInAndRedirect()}
-	>
-		{text}
-	</button>
+	<div>
+		<button
+			className="btn btn-ghost text-xl text-center dark:text-white btn-outline"
+			onClick={() => signInAndRedirect()}
+		>
+			{text}
+		</button>
+	</div>
 );
