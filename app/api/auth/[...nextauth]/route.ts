@@ -1,16 +1,40 @@
-import NextAuth from "next-auth"
-import GitHubProvider from "next-auth/providers/github"
+import NextAuth from "next-auth/next";
+import { PrismaClient } from "@prisma/client"
+import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
+import bcrypt from 'bcrypt'
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { Adapter } from "next-auth/adapters";
 
+const prisma = new PrismaClient()
 
 const handler = NextAuth({
   providers: [
-   GitHubProvider({
+    GitHubProvider({
     clientId: process.env.GITHUB_CLIENT_ID ?? "",
     clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
-    allowDangerousEmailAccountLinking: true,
+    }),
+    GoogleProvider({
+    clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     })
-
   ],
+  secret: process.env.NEXT_AUTH_SECRET,
+
+  session: {
+    strategy: "jwt"
+  },
+  adapter: PrismaAdapter(prisma) as Adapter,
+
+  callbacks : {
+    async signIn({ user, account, profile, email, credentials }) {
+      console.log("callback: ", user, account, profile, email, credentials)
+      return true
+    },
+  },
+
+  debug: process.env.NODE_ENV === "development",
 })
-    
+     
 export { handler as GET, handler as POST }

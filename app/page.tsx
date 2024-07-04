@@ -3,7 +3,13 @@
 import Signin from "@/components/auth/Signin";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+import { ProviderInfo } from "@/components/auth/Signin";
 import React from "react";
+
+const providers = [
+	{ providerName: "github", displayName: "GitHub" },
+	{ providerName: "google", displayName: "Google" },
+] as ProviderInfo[];
 
 function page() {
 	const { data: session } = useSession();
@@ -16,7 +22,7 @@ function page() {
 			<h1 className="lg:text-3xl text-xl py-10">
 				Welcome to CrateTime, a pet management app for your family or house!
 			</h1>
-			<Signin text={"Login/Signup"} />
+			<Signin buttonText={"Login/Signup"} providers={providers} />
 		</div>
 	);
 }
