@@ -18,8 +18,8 @@ function page() {
 		redirect("/home");
 	}
 	return (
-		<div className="min-h-screen bg-base-300 text-center">
-			<h1 className="lg:text-3xl text-xl py-10">
+		<div className="min-h-screen flex flex-col items-center bg-base-300 text-center">
+			<h1 className="lg:text-3xl text-xl my-10 ">
 				Welcome to CrateTime, a pet management app for your family or house!
 			</h1>
 			<Signin buttonText={"Login/Signup"} providers={providers} />

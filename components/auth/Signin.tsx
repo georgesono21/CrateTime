@@ -1,34 +1,33 @@
 "use client";
-
 import { signIn } from "next-auth/react";
-import React from "react";
+import { redirect } from "next/navigation";
 
 export interface ProviderInfo {
 	providerName: string;
 	displayName: string;
 }
 
-interface SigninProps {
+export default ({
+	buttonText,
+	providers,
+}: {
 	buttonText: string;
 	providers: ProviderInfo[];
-}
-
-const Signin: React.FC<SigninProps> = ({ buttonText, providers }) => (
+}) => (
 	<div
-		className="items-center grid grid-cols-1 gap-4"
-		style={{ width: "20%", margin: "0 auto" }}
+		className=" grid col-1 justify-center border p-5"
+		style={{ width: "300px" }}
 	>
-		<h1 className="text-xl mb-5">{buttonText}</h1>
-		{providers.map((provider, index) => (
+		<h1 className="text-2xl pb-10 font-semibold ">{buttonText}</h1>
+
+		{providers.map((provider) => (
 			<button
-				key={index}
-				className="btn btn-ghost text-xl text-center dark:text-white btn-outline"
+				key={provider.providerName}
+				className="btn btn-ghost text-xl text-center dark:text-white btn-outline mb-5"
 				onClick={() => signIn(provider.providerName)}
 			>
-				{provider.displayName}
+				Use {provider.displayName}
 			</button>
 		))}
 	</div>
 );
-
-export default Signin;
