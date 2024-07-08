@@ -1,10 +1,5 @@
 import React from "react";
-
-export interface PetCrateTime {
-	name: string;
-	crateTimeTodayInMinutes: number;
-	maxCrateTimeInMinutes: number;
-}
+import { PetCrateTime } from "../models";
 
 const CrateTime = ({ pets }: { pets: PetCrateTime[] }) => {
 	return (

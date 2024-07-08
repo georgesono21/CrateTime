@@ -1,3 +1,5 @@
+import { Pet } from "@/components/models";
+
 export const crateTimeToday = [
     {name: "Chloe",
     crateTimeTodayInMinutes: 100,
@@ -47,3 +49,9 @@ export const petTasks = [
         ]
     }
 ];
+
+export const allPets = [{
+    id:"1",
+    name:"Chloe",
+    pfpUrl: "",
+}]

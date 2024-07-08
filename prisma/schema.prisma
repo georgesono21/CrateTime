@@ -20,7 +20,10 @@ model User {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  accounts Account[]
+  familyIds String[] @default([]) @db.ObjectId
+  families  Family[] @relation(fields: [familyIds], references: [id])
+
+  Account Account[]
 }
 
 model Account {
@@ -40,4 +43,14 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+}
+
+model Family {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  membersIds    String[] @default([]) @db.ObjectId
+  familyMembers User[]   @relation(fields: [membersIds], references: [id])
 }

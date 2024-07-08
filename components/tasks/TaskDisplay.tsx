@@ -1,11 +1,6 @@
 import React from "react";
-import TasksForASinglePetDisplay, { Task } from "./TaskForASinglePet";
-
-export interface TasksForAPet {
-	id: string;
-	name: string;
-	tasks: Task[];
-}
+import TasksForASinglePetDisplay from "./TaskForASinglePet";
+import { Task, TasksForAPet } from "../models";
 
 const TaskDisplay = ({ petTasks }: { petTasks: TasksForAPet[] }) => {
 	return (

@@ -1,6 +1,6 @@
 "use client";
 import { signIn } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useCallback } from "react";
 
 export interface ProviderInfo {
 	providerName: string;
@@ -24,7 +24,9 @@ export default ({
 			<button
 				key={provider.providerName}
 				className="btn btn-ghost text-xl text-center dark:text-white btn-outline mb-5"
-				onClick={() => signIn(provider.providerName)}
+				onClick={async () =>
+					await signIn(provider.providerName, { callbackUrl: "/home" })
+				}
 			>
 				Use {provider.displayName}
 			</button>

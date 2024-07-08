@@ -1,13 +1,5 @@
 import React from "react";
-
-export interface Task {
-	title: string;
-	desc: string;
-	deadline: Date;
-	suggestedMinTimeOutsideInMins: number;
-	status: string;
-	assignedTo: string;
-}
+import { Task } from "../models";
 
 const TasksForASinglePetDisplay = ({ tasks }: { tasks: Task[] }) => {
 	return (

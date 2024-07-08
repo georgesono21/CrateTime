@@ -12,11 +12,6 @@ const providers = [
 ] as ProviderInfo[];
 
 function page() {
-	const { data: session } = useSession();
-
-	if (session) {
-		redirect("/home");
-	}
 	return (
 		<div className="min-h-screen flex flex-col items-center bg-base-300 text-center">
 			<h1 className="lg:text-3xl text-xl my-10 ">

@@ -6,8 +6,8 @@ import GitHubProvider from "next-auth/providers/github";
 import bcrypt from 'bcrypt'
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Adapter } from "next-auth/adapters";
-
-const prisma = new PrismaClient()
+import prisma from "@/app/libs/prismadb";
+import { createNewFamily } from "@/app/libs/dbFuncs";
 
 const handler = NextAuth({
   providers: [
@@ -29,9 +29,29 @@ const handler = NextAuth({
 
   callbacks : {
     async signIn({ user, account, profile, email, credentials }) {
-      console.log("callback: ", user, account, profile, email, credentials)
+      // console.log("signin callback: ", user, account, profile, email, credentials)
+  
       return true
     },
+    async jwt({ token, account, profile }) {
+    // Persist the OAuth access_token and or the user id to the token right after signin
+      
+      // console.log("jwt callback: ", token, account, profile)
+      return token
+    },
+
+    async session({ session, token, user }) {
+    // Send properties to the client, like an access_token and user id from a provider.
+      // console.log("session callback: ",session, token, user)
+
+      if (session && session.user) {
+        session.user.id = token.sub || "not logged in"
+      }
+
+    
+    return session 
+  }
+    
   },
 
   debug: process.env.NODE_ENV === "development",
