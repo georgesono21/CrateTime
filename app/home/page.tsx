@@ -14,21 +14,21 @@ import { createNewFamily } from "../api/family/actions";
 // import { createNewFamily } from "../libs/dbFuncs";
 
 export default function Home() {
-	const session = useSession();
+	// const session = useSession();
 
-	async function test() {
-		console.log("test useSession: ", session);
+	// async function test() {
+	// 	console.log("test useSession: ", session);
 
-		if (session.data && session.data.user) {
-			await createNewFamily(session.data.user.id);
-		}
-	}
+	// 	if (session.data && session.data.user) {
+	// 		await createNewFamily(session.data.user.id);
+	// 	}
+	// }
 
 	return (
-		<div className="bg-base-300 flex min-h-screen flex-col p-24">
-			<button className="border" onClick={async () => await test()}>
+		<div className="bg-base-300 flex min-h-screen flex-col p-10">
+			{/* <button className="border" onClick={async () => await test()}>
 				db test
-			</button>
+			</button> */}
 			<div className="mb-10">
 				<h1 className="text-3xl mb-5 font-bold text-center">Pet CrateTime</h1>
 				<CrateTime pets={crateTimeToday as PetCrateTime[]} />

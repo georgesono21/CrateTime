@@ -30,7 +30,7 @@ const NavBar = () => {
 					</Link>
 
 					<Link
-						href="/"
+						href="/home/family"
 						className="sm:text-base md:text-xl lg:text-xl btn btn-ghost text-center"
 					>
 						Family

@@ -20,10 +20,50 @@ model User {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  familyIds String[] @default([]) @db.ObjectId
-  families  Family[] @relation(fields: [familyIds], references: [id])
+  familyIds String[]  @default([]) @db.ObjectId
+  families  Family[]  @relation("members", fields: [familyIds], references: [id])
+  Account   Account[]
+  Family    Family[]  @relation("admin")
+  Task      Task[]
+}
 
-  Account Account[]
+model Pet {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String?
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  familyId String @db.ObjectId
+  Task     Task[]
+
+  Family Family @relation("owner", fields: [familyId], references: [id])
+
+  ignore String[] @default([]) @db.ObjectId
+  family Family[] @relation("pets", fields: [ignore], references: [id])
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Task {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  desc      String     @default("")
+  petId     String     @db.ObjectId
+  userId    String     @db.ObjectId
+  familyId  String     @db.ObjectId
+  status    TaskStatus
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  pet    Pet    @relation(fields: [petId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  family Family @relation(fields: [familyId], references: [id])
 }
 
 model Account {
@@ -51,6 +91,15 @@ model Family {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  adminId String @db.ObjectId
+  admin   User   @relation("admin", fields: [adminId], references: [id])
+
   membersIds    String[] @default([]) @db.ObjectId
-  familyMembers User[]   @relation(fields: [membersIds], references: [id])
+  familyMembers User[]   @relation("members", fields: [membersIds], references: [id])
+
+  petIds String[] @default([]) @db.ObjectId
+  pets   Pet[]    @relation("pets", fields: [petIds], references: [id])
+
+  Task Task[]
+  Pet  Pet[]  @relation("owner")
 }
