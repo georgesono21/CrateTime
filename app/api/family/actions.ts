@@ -3,11 +3,120 @@
 import prisma from "@/app/libs/prismadb";
 import { Family } from "@prisma/client";
 
+// Send an invitation to join a family
+export async function sendFamilyInvitation(familyId: string, userId: string) {
+    const family = await prisma.family.findUnique({
+        where: { id: familyId },
+    });
+
+    if (!family) {
+        throw new Error(`Family with id ${familyId} not found.`);
+    }
+
+    await prisma.family.update({
+        where: { id: familyId },
+        data: {
+            invitationToUserIds: {
+                push: userId
+            }
+        }
+    });
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: {
+            invitationsFamilyIds: {
+                push: familyId
+            }
+        }
+    });
+}
+
+// Accept an invitation to join a family
+export async function acceptFamilyInvitation(userId: string, familyId: string) {
+    const family = await prisma.family.findUnique({
+        where: { id: familyId },
+    });
+
+    if (!family) {
+        throw new Error(`Family with id ${familyId} not found.`);
+    }
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: {
+            families: {
+                connect: { id: familyId },
+            },
+            invitationsFamilyIds: {
+                set: (await prisma.user.findUnique({ where: { id: userId } }))?.invitationsFamilyIds.filter(id => id !== familyId || []),
+            }
+        }
+    });
+
+    await prisma.family.update({
+        where: { id: familyId },
+        data: {
+            familyMembers: {
+                connect: { id: userId },
+            },
+            invitationToUserIds: {
+                set: family.invitationToUserIds.filter(id => id !== userId),
+            }
+        }
+    });
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: {
+            invitationsFamilyIds: {
+                set: (await prisma.user.findUnique({ where: { id: userId } }))?.invitationsFamilyIds.filter(id => id !== familyId || []),
+            }
+        }
+    });
+}
+
+// Reject an invitation to join a family
+export async function rejectFamilyInvitation(userId: string, familyId: string) {
+    await prisma.user.update({
+        where: { id: userId },
+        data: {
+            invitationsFamilyIds: {
+                set: (await prisma.user.findUnique({ where: { id: userId } }))?.invitationsFamilyIds.filter(id => id !== familyId || []),
+            }
+        }
+    });
+
+    await prisma.family.update({
+        where: { id: familyId },
+        data: {
+            invitationToUserIds: {
+                set: (await prisma.family.findUnique({ where: { id: familyId } }))?.invitationToUserIds.filter(id => id !== userId  || []),
+            }
+        }
+    });
+}
+
+// Retrieve the invitations sent to a user
+export async function getUserInvitations(userId: string) {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { invites: true },
+    });
+
+    if (!user) {
+        throw new Error(`User with id ${userId} not found.`);
+    }
+
+    return user.invites;
+}
+
+// Other family-related functions
 export async function createNewFamily(uId: string, newFamilyName: string) {
     const family = await prisma.family.create({
         data: {
             name: newFamilyName, // Replace with actual family name or data
-			adminId: uId
+            adminId: uId
         },
     });
 
@@ -46,7 +155,6 @@ export async function retrieveUserFamilies(uId: string) {
 
     console.log(`retrieveUserFamily: uId: ${uId}: families: ${JSON.stringify(families, null, 2)}`);
     return families as Family[];
-
 }
 
 export async function retrieveFamilyMembers(familyId: string) {
@@ -62,7 +170,6 @@ export async function retrieveFamilyMembers(familyId: string) {
     console.log(family.familyMembers)
     return family.familyMembers;
 }
-
 
 export async function changeFamilyAdmin(newAdminId: string, currentUserId: string, familyId: string) {
     // Check if the current user is the admin of the family
@@ -105,6 +212,7 @@ export async function joinFamily(uId: string, familyId: string) {
         },
     });
 }
+
 export async function deleteFamily(familyId: string) {
     // Find the family and its members
     const family = await prisma.family.findUnique({
@@ -131,8 +239,6 @@ export async function deleteFamily(familyId: string) {
         where: { id: familyId },
     });
 }
-
-
 
 export async function leaveFamily(uId: string, familyId: string) {
     const family = await prisma.family.findUnique({

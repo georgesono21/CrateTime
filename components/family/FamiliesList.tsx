@@ -2,13 +2,18 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
+	acceptFamilyInvitation,
 	createNewFamily,
 	deleteFamily,
+	getUserInvitations,
+	rejectFamilyInvitation,
 	retrieveFamilyMembers,
 	retrieveUserFamilies,
+	sendFamilyInvitation,
 	updateFamilyName, // Import the new function for updating family name
 } from "@/app/api/family/actions";
 import { Family, User } from "@prisma/client";
+import { getUserIdFromEmail } from "@/app/api/user/actions";
 
 // Modal Component
 const Modal = ({
@@ -214,35 +219,28 @@ const ViewInvitationsModal = ({
 }: {
 	isOpen: boolean;
 	onClose: () => void;
-	invitations: {
-		familyName: string;
-		inviterName: string;
-		inviterEmail: string;
-		familyId: string;
-	}[];
+	invitations: Family[];
 	onAccept: (familyId: string) => void;
 	onDecline: (familyId: string) => void;
 }) => {
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
 			<h2 className="text-xl font-bold mb-4">Family Invitations</h2>
+			{invitations.length == 0 ? <h1> No invitatiations yet...</h1> : null}
 			<ul>
 				{invitations.map((invitation) => (
-					<li key={invitation.familyId} className="mb-4">
-						<p>
-							You have been invited to join the family "{invitation.familyName}"
-							by {invitation.inviterName} ({invitation.inviterEmail}).
-						</p>
+					<li key={invitation.id} className="mb-4">
+						<p>You have been invited to join the family "{invitation.name}!"</p>
 						<div className="flex justify-end mt-4">
 							<button
 								className="bg-green-500 text-white px-4 py-2 rounded mr-2"
-								onClick={() => onAccept(invitation.familyId)}
+								onClick={() => onAccept(invitation.id)}
 							>
 								Accept
 							</button>
 							<button
 								className="bg-red-500 text-white px-4 py-2 rounded"
-								onClick={() => onDecline(invitation.familyId)}
+								onClick={() => onDecline(invitation.id)}
 							>
 								Decline
 							</button>
@@ -271,14 +269,7 @@ const FamilyList = () => {
 	const [familyToDelete, setFamilyToDelete] = useState<Family | null>(null);
 	const [isViewInvitationsModalOpen, setViewInvitationsModalOpen] =
 		useState(false);
-	const [invitations, setInvitations] = useState<
-		{
-			familyName: string;
-			inviterName: string;
-			inviterEmail: string;
-			familyId: string;
-		}[]
-	>([]);
+	const [invitations, setInvitations] = useState<Family[]>([]);
 
 	const { data: session } = useSession();
 
@@ -289,6 +280,17 @@ const FamilyList = () => {
 				setFamilies(fetchedFamilies);
 			} catch (error) {
 				console.error("Failed to retrieve families:", error);
+			}
+		}
+	};
+
+	const fetchInvitations = async () => {
+		if (session?.user?.id) {
+			try {
+				const userInvitations = await getUserInvitations(session.user.id);
+				setInvitations(userInvitations);
+			} catch (error) {
+				console.error("Failed to retrieve invitations:", error);
 			}
 		}
 	};
@@ -305,17 +307,6 @@ const FamilyList = () => {
 				`Failed to retrieve members for family ${familyId}:`,
 				error
 			);
-		}
-	};
-
-	const fetchInvitations = async () => {
-		if (session?.user?.id) {
-			try {
-				const userInvitations = await fetchFamilyInvitations(session.user.id);
-				setInvitations(userInvitations);
-			} catch (error) {
-				console.error("Failed to retrieve invitations:", error);
-			}
 		}
 	};
 
@@ -354,7 +345,29 @@ const FamilyList = () => {
 	};
 
 	const handleAddMember = async () => {
-		// Implement add member functionality if needed
+		if (newMemberEmail.trim() !== "") {
+			try {
+				// Assuming you have a method to retrieve userId from email, replace this logic accordingly
+				const userId = await getUserIdFromEmail(newMemberEmail);
+
+				if (!userId) {
+					throw new Error(`User with email ${newMemberEmail} not found.`);
+				}
+
+				// Send invitation to the family
+				await sendFamilyInvitation(selectedFamilyId!, userId);
+
+				// Reset state and close modal
+				setNewMemberEmail("");
+				setAddMemberModalOpen(false);
+				setSelectedFamilyId(null);
+
+				// Optionally refresh family members after adding new member
+				await fetchFamilyMembers(selectedFamilyId!);
+			} catch (error) {
+				console.error("Failed to add member to family:", error);
+			}
+		}
 	};
 
 	const handleRemoveMember = async () => {
@@ -375,26 +388,26 @@ const FamilyList = () => {
 	};
 
 	const handleAcceptInvitation = async (familyId: string) => {
-		// try {
-		// 	await setInvitations(session?.user?.id, familyId);
-		// 	setInvitations(
-		// 		invitations.filter((invitation) => invitation.familyId !== familyId)
-		// 	);
-		// 	await fetchFamilies();
-		// } catch (error) {
-		// 	console.error("Failed to accept invitation:", error);
-		// }
+		try {
+			await acceptFamilyInvitation(session?.user?.id || "", familyId);
+			setInvitations(
+				invitations.filter((invitation) => invitation.id != familyId)
+			);
+			await fetchFamilies(); // Optionally refresh families after accepting invitation
+		} catch (error) {
+			console.error("Failed to accept invitation:", error);
+		}
 	};
 
 	const handleDeclineInvitation = async (familyId: string) => {
-		// try {
-		// 	await declineInvitation(session?.user?.id, familyId);
-		// 	setInvitations(
-		// 		invitations.filter((invitation) => invitation.familyId !== familyId)
-		// 	);
-		// } catch (error) {
-		// 	console.error("Failed to decline invitation:", error);
-		// }
+		try {
+			await rejectFamilyInvitation(session?.user?.id || "", familyId);
+			setInvitations(
+				invitations.filter((invitation) => invitation.id != familyId)
+			);
+		} catch (error) {
+			console.error("Failed to decline invitation:", error);
+		}
 	};
 
 	const closeModal = () => {
@@ -407,8 +420,8 @@ const FamilyList = () => {
 	};
 
 	return (
-		<div className="m-8 w-3/4">
-			<div className="flex gap-4">
+		<div className="m-8 flex-col justify-center">
+			<div className="flex justify-center items-center gap-4">
 				<button
 					className="btn btn-ghost text-xl text-center dark:text-white btn-outline mb-5"
 					onClick={() => setCreateModalOpen(true)}
@@ -423,11 +436,13 @@ const FamilyList = () => {
 				</button>
 			</div>
 
-			<ul className="flex gap-3">
+			<div className="flex-wrap gap-3">
+				{families.length == 0 ? <h1> No Famiies Yet...</h1> : null}
 				{families.map((family) => (
-					<li
-						className="w-1/2 border p-4 mb-4 rounded-lg shadow-sm"
+					<div
+						className=" border border-color p-4 mb-4 rounded-lg shadow-sm"
 						key={family.id}
+						// style={{ width: "500px" }}
 					>
 						<h2 className="text-xl font-semibold mb-2">{family.name}</h2>
 						<p className="text-sm mb-2">
@@ -508,9 +523,9 @@ const FamilyList = () => {
 								</button>
 							) : null}
 						</div>
-					</li>
+					</div>
 				))}
-			</ul>
+			</div>
 			<EditFamilyModal
 				isOpen={!!editingFamily}
 				onClose={closeModal}

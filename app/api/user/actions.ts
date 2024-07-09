@@ -1,6 +1,7 @@
 
 //User
 'use server'
+import prisma from '@/app/libs/prismadb';
 import { ObjectId } from 'mongodb';
 
 function isNewUser(uId: string): boolean{
@@ -29,3 +30,20 @@ function isUserIsInFamily(uId: string): boolean{
 
 
 
+export async function getUserIdFromEmail(email: string): Promise<string | null> {
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                email: email.toLowerCase(), // Ensure case-insensitive search if needed
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        return user?.id || null; // Return userId if found, otherwise null
+    } catch (error) {
+        console.error(`Error fetching user by email ${email}:`, error);
+        throw new Error(`Failed to fetch user by email ${email}: ${error.message}`);
+    }
+}

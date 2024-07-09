@@ -11,7 +11,7 @@ const ProfileButton = () => {
 		return (
 			<Link
 				className="sm:text-base md:text-xl lg:text-xl btn btn-ghost  text-center"
-				href={`/home/profile/${session.user.id}`}
+				href={`/home/profile?uid=${session.user.id}`}
 			>
 				Profile
 			</Link>

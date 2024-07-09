@@ -11,20 +11,23 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  name           String?
-  email          String?   @unique
-  emailVerified  DateTime?
-  image          String?
-  hashedPassword String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id                   String    @id @default(auto()) @map("_id") @db.ObjectId
+  name                 String?
+  email                String?   @unique
+  emailVerified        DateTime?
+  image                String?
+  hashedPassword       String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  invitationsFamilyIds String[]  @default([]) @db.ObjectId
 
   familyIds String[]  @default([]) @db.ObjectId
   families  Family[]  @relation("members", fields: [familyIds], references: [id])
   Account   Account[]
   Family    Family[]  @relation("admin")
   Task      Task[]
+
+  invites Family[] @relation("invites", fields: [invitationsFamilyIds], references: [id])
 }
 
 model Pet {
@@ -100,6 +103,8 @@ model Family {
   petIds String[] @default([]) @db.ObjectId
   pets   Pet[]    @relation("pets", fields: [petIds], references: [id])
 
-  Task Task[]
-  Pet  Pet[]  @relation("owner")
+  invitationToUserIds String[] @default([]) @db.ObjectId
+  invitationToUser    User[]   @relation("invites", fields: [invitationToUserIds], references: [id])
+  Task                Task[]
+  Pet                 Pet[]    @relation("owner")
 }
