@@ -3,10 +3,10 @@
 import prisma from "@/app/libs/prismadb";
 import { Family } from "@prisma/client";
 
-export async function createNewFamily(uId: string) {
+export async function createNewFamily(uId: string, newFamilyName: string) {
     const family = await prisma.family.create({
         data: {
-            name: "New Family Name", // Replace with actual family name or data
+            name: newFamilyName, // Replace with actual family name or data
 			adminId: uId
         },
     });
@@ -64,7 +64,7 @@ export async function retrieveFamilyMembers(familyId: string) {
 }
 
 
-export async function editFamily(newAdminId: string, currentUserId: string, familyId: string) {
+export async function changeFamilyAdmin(newAdminId: string, currentUserId: string, familyId: string) {
     // Check if the current user is the admin of the family
     const family = await prisma.family.findUnique({
         where: { id: familyId },
@@ -105,14 +105,26 @@ export async function joinFamily(uId: string, familyId: string) {
         },
     });
 }
-
 export async function deleteFamily(familyId: string) {
+    // Find the family and its members
     const family = await prisma.family.findUnique({
         where: { id: familyId },
+        include: { familyMembers: true },
     });
 
     if (!family) {
         throw new Error(`Family with id ${familyId} not found.`);
+    }
+
+    for (const member of family.familyMembers) {
+        await prisma.user.update({
+            where: { id: member.id },
+            data: {
+                familyIds: {
+                    set: member.familyIds.filter((id) => id !== familyId),
+                },
+            },
+        });
     }
 
     await prisma.family.delete({
@@ -139,4 +151,13 @@ export async function leaveFamily(uId: string, familyId: string) {
             },
         },
     });
+}
+
+export async function updateFamilyName(familyId: string, newFamilyName: string) {
+    const updatedFamily = await prisma.family.update({
+        where: { id: familyId },
+        data: { name: newFamilyName },
+    });
+
+    return updatedFamily;
 }

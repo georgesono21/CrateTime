@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import AuthButton from "./auth/AuthButton";
 import Signout from "./auth/Signout";
+import ProfileButton from "./user/ProfileButton";
 
 const NavBar = () => {
 	return (
@@ -36,6 +37,7 @@ const NavBar = () => {
 						Family
 					</Link>
 
+					<ProfileButton />
 					<Signout />
 				</div>
 			</div>
