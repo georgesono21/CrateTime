@@ -3,6 +3,7 @@ import {
 	createNewFamily,
 	joinFamily,
 	retrieveFamilyMembers,
+	retrieveUserFamilies,
 } from "@/app/api/family/actions";
 import { useSession } from "next-auth/react";
 import React from "react";
@@ -39,6 +40,18 @@ const FamilyActionsDisplay = () => {
 				}
 			>
 				Read
+			</button>
+
+			<button
+				className="btn btn-ghost text-xl text-center dark:text-white btn-outline mb-5"
+				onClick={async () =>
+					console.log(
+						"retrieveUserFamilies: familyMembers: ",
+						await retrieveUserFamilies(session?.user.id || "")
+					)
+				}
+			>
+				Retrieve Families
 			</button>
 
 			<button

@@ -1,62 +1,86 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import {
+	deleteFamily,
+	retrieveFamilyMembers,
+	retrieveUserFamilies,
+} from "@/app/api/family/actions";
+import { Family, User } from "@prisma/client";
 
-interface User {
-	id: string;
-	name: string;
-}
+// Modal Component
+const Modal = ({ isOpen, onClose, children }) => {
+	return (
+		isOpen && (
+			<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+				<div className="bg-base-100 p-6 rounded-lg shadow-lg relative w-96">
+					<button
+						className="absolute top-2 right-2 text-xl font-bold"
+						onClick={onClose}
+					>
+						&times;
+					</button>
+					{children}
+				</div>
+			</div>
+		)
+	);
+};
 
-interface Family {
-	id: string;
-	name: string;
-	createdAt: string;
-	updatedAt: string;
-	familyMembers: User[];
-}
-const mockFamilies: Family[] = [
-	{
-		id: "1",
-		name: "Smith Family",
-		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
-		familyMembers: [
-			{ id: "1", name: "John Smith" },
-			{ id: "2", name: "Jane Smith" },
-		],
-	},
-	{
-		id: "2",
-		name: "Doe Family",
-		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
-		familyMembers: [
-			{ id: "3", name: "John Doe" },
-			{ id: "4", name: "Jane Doe" },
-		],
-	},
-];
-
-const FamilyList: React.FC = () => {
-	const [families, setFamilies] = useState<Family[]>(mockFamilies);
-	const [editingFamilyId, setEditingFamilyId] = useState<string | null>(null);
+const FamilyList = () => {
+	const [families, setFamilies] = useState<Family[]>([]);
+	const [editingFamily, setEditingFamily] = useState<Family | null>(null);
+	const [familyMembers, setFamilyMembers] = useState<{ [key: string]: User[] }>(
+		{}
+	);
 	const [newFamilyName, setNewFamilyName] = useState<string>("");
 
-	useEffect(() => {
-		fetch("/api/families")
-			.then((response) => response.json())
-			.then((data: Family[]) => setFamilies(data))
-			.catch((error) => console.error("Error fetching families:", error));
-	}, []);
+	const { data: session } = useSession();
 
-	const handleDelete = (id: string) => {
-		fetch(`/api/families/${id}`, { method: "DELETE" })
-			.then(() => setFamilies(families.filter((family) => family.id !== id)))
-			.catch((error) => console.error("Error deleting family:", error));
+	useEffect(() => {
+		const fetchFamilies = async () => {
+			if (session?.user?.id) {
+				try {
+					const fetchedFamilies = await retrieveUserFamilies(session.user.id);
+					setFamilies(fetchedFamilies);
+				} catch (error) {
+					console.error("Failed to retrieve families:", error);
+				}
+			}
+		};
+
+		fetchFamilies();
+	}, [session?.user?.id]);
+
+	const fetchFamilyMembers = async (familyId: string) => {
+		try {
+			const members = await retrieveFamilyMembers(familyId);
+			setFamilyMembers((prevMembers) => ({
+				...prevMembers,
+				[familyId]: members,
+			}));
+		} catch (error) {
+			console.error(
+				`Failed to retrieve members for family ${familyId}:`,
+				error
+			);
+		}
 	};
 
-	const handleEdit = (id: string, name: string) => {
-		setEditingFamilyId(id);
-		setNewFamilyName(name);
+	useEffect(() => {
+		families.forEach((family) => {
+			fetchFamilyMembers(family.id);
+		});
+	}, [families]);
+
+	const handleDelete = async (id: string) => {
+		deleteFamily(id);
+		setFamilies(families.filter((family) => family.id !== id));
+	};
+
+	const handleEdit = (family: Family) => {
+		setEditingFamily(family);
+		setNewFamilyName(family.name);
 	};
 
 	const handleUpdate = (id: string) => {
@@ -70,47 +94,69 @@ const FamilyList: React.FC = () => {
 				setFamilies(
 					families.map((family) => (family.id === id ? updatedFamily : family))
 				);
-				setEditingFamilyId(null);
+				setEditingFamily(null);
 				setNewFamilyName("");
 			})
 			.catch((error) => console.error("Error updating family:", error));
 	};
 
+	const closeModal = () => {
+		setEditingFamily(null);
+	};
+
 	return (
-		<div>
-			<h1>Family List</h1>
+		<div className="p-8">
 			<ul>
 				{families.map((family) => (
-					<li className="border p-10 m-5" key={family.id}>
-						{editingFamilyId === family.id ? (
-							<>
-								<input
-									type="text"
-									value={newFamilyName}
-									onChange={(e) => setNewFamilyName(e.target.value)}
-								/>
-								<button onClick={() => handleUpdate(family.id)}>Save</button>
-							</>
-						) : (
-							<>
-								<h2>{family.name}</h2>
-								<button onClick={() => handleEdit(family.id, family.name)}>
-									Edit
-								</button>
-							</>
-						)}
-						<button onClick={() => handleDelete(family.id)}>Delete</button>
-						<p>Created At: {new Date(family.createdAt).toLocaleString()}</p>
-						<p>Updated At: {new Date(family.updatedAt).toLocaleString()}</p>
-						<h3>Members:</h3>
-						<ul>
-							{family.familyMembers.map((member) => (
+					<li className="border p-4 mb-4 rounded-lg shadow-sm" key={family.id}>
+						<h2 className="text-xl font-semibold mb-2">{family.name}</h2>
+						<p className="text-sm mb-2">
+							Created At: {new Date(family.createdAt).toLocaleString()}
+						</p>
+						<p className="text-sm mb-4">
+							Updated At: {new Date(family.updatedAt).toLocaleString()}
+						</p>
+						<h3 className="font-semibold mb-2">Members:</h3>
+						<ul className="list-disc list-inside">
+							{/* You can render family members here */}
+							{familyMembers[family.id]?.map((member) => (
 								<li key={member.id}>{member.name}</li>
 							))}
 						</ul>
+						<div className="flex mb-4">
+							<button
+								className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+								onClick={() => handleEdit(family)}
+							>
+								Edit
+							</button>
+							<button
+								className="bg-red-500 text-white px-4 py-2 rounded"
+								onClick={() => handleDelete(family.id)}
+							>
+								Delete
+							</button>
+						</div>
 					</li>
 				))}
 			</ul>
+
+			{/* Modal for editing family */}
+			<Modal isOpen={editingFamily !== null} onClose={closeModal}>
+				<h2 className="text-xl font-bold mb-4">Edit Family</h2>
+				<input
+					type="text"
+					value={newFamilyName}
+					onChange={(e) => setNewFamilyName(e.target.value)}
+					className="border p-2 mb-4 w-full"
+				/>
+				<button
+					className="bg-green-500 text-white px-4 py-2 rounded"
+					onClick={() => handleUpdate(editingFamily?.id || "")}
+				>
+					Save
+				</button>
+			</Modal>
 		</div>
 	);
 };

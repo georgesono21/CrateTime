@@ -1,6 +1,7 @@
 'use server';
 
 import prisma from "@/app/libs/prismadb";
+import { Family } from "@prisma/client";
 
 export async function createNewFamily(uId: string) {
     const family = await prisma.family.create({
@@ -18,6 +19,34 @@ export async function createNewFamily(uId: string) {
             },
         },
     });
+}
+
+export async function retrieveUserFamilies(uId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: uId },
+      include: { families: true },
+    });
+
+    if (!user) {
+      throw new Error(`User with id ${uId} does not exist`);
+    }
+
+    const families = await Promise.all(user.families.map(async (family) => {
+      const fullFamily = await prisma.family.findUnique({
+        where: { id: family.id },
+        include: { familyMembers: true, admin: true },
+      });
+
+      return fullFamily;
+    }));
+
+    if (!families) {
+      throw new Error(`User does not have a families array in user document or user DNE`);
+    }
+
+    console.log(`retrieveUserFamily: uId: ${uId}: families: ${JSON.stringify(families, null, 2)}`);
+    return families as Family[];
+
 }
 
 export async function retrieveFamilyMembers(familyId: string) {
