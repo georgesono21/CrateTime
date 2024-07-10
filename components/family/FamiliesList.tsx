@@ -7,6 +7,7 @@ import {
 	deleteFamily,
 	getUserInvitations,
 	rejectFamilyInvitation,
+	removeMemberFromFamily,
 	retrieveFamilyMembers,
 	retrieveUserFamilies,
 	sendFamilyInvitation,
@@ -146,23 +147,31 @@ const RemoveMemberModal = ({
 	onConfirm,
 	memberName,
 	memberUId,
+	currentUid,
 }: {
 	isOpen: any;
 	onClose: any;
 	onConfirm: any;
 	memberName: string;
 	memberUId: string;
+	currentUid: string;
 }) => {
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
-			<h2 className="text-xl font-bold mb-4">Remove Member</h2>
-			<p>Are you sure you want to remove {memberName} from the family?</p>
+			<h2 className="text-xl font-bold mb-4">
+				{currentUid != memberUId ? `Remove Member` : "Leave Family"}
+			</h2>
+			<p>
+				{currentUid != memberUId
+					? `Are you sure you want to remove ${memberName} from the family?`
+					: "Are you sure you want to leave the family?"}
+			</p>
 			<div className="flex justify-end mt-4">
 				<button
 					className="bg-red-500 text-white px-4 py-2 rounded mr-2"
 					onClick={onConfirm}
 				>
-					Remove
+					{currentUid != memberUId ? `Remove` : "Leave"}
 				</button>
 				<button
 					className="bg-gray-500 text-white px-4 py-2 rounded"
@@ -189,6 +198,7 @@ const DeleteFamilyModal = ({
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
 			<h2 className="text-xl font-bold mb-4">Delete Family</h2>
+
 			<p>Are you sure you want to delete the family "{familyName}"?</p>
 			<div className="flex justify-end mt-4">
 				<button
@@ -230,7 +240,7 @@ const ViewInvitationsModal = ({
 			<ul>
 				{invitations.map((invitation) => (
 					<li key={invitation.id} className="mb-4">
-						<p>You have been invited to join the family "{invitation.name}!"</p>
+						<p>You have been invited to join the family "{invitation.name}"</p>
 						<div className="flex justify-end mt-4">
 							<button
 								className="bg-green-500 text-white px-4 py-2 rounded mr-2"
@@ -371,7 +381,35 @@ const FamilyList = () => {
 	};
 
 	const handleRemoveMember = async () => {
-		// Implement remove member functionality if needed
+		if (memberToRemove && selectedFamilyId) {
+			try {
+				// Assuming you have a method to remove a member from a family in your API
+				await removeMemberFromFamily(
+					memberToRemove.id,
+					selectedFamilyId,
+					session?.user.id || ""
+				);
+
+				// Update local state to reflect the removal
+				setFamilyMembers((prevMembers) => ({
+					...prevMembers,
+					[selectedFamilyId]: prevMembers[selectedFamilyId]?.filter(
+						(member) => member.id !== memberToRemove.id
+					),
+				}));
+
+				// Close the modal after successful removal
+				setRemoveMemberModalOpen(false);
+
+				if (memberToRemove.id == session?.user?.id) {
+					setFamilies(
+						families.filter((family) => family.id !== selectedFamilyId)
+					);
+				}
+			} catch (error) {
+				console.error("Failed to remove member from family:", error);
+			}
+		}
 	};
 
 	const handleUpdate = async () => {
@@ -430,7 +468,10 @@ const FamilyList = () => {
 				</button>
 				<button
 					className="btn btn-ghost text-xl text-center dark:text-white btn-outline mb-5"
-					onClick={() => setViewInvitationsModalOpen(true)}
+					onClick={async () => {
+						await fetchFamilies();
+						setViewInvitationsModalOpen(true);
+					}}
 				>
 					View Family Invitations
 				</button>
@@ -474,18 +515,32 @@ const FamilyList = () => {
 									<p>
 										{member.name} ({member.email})
 									</p>
-									{family.adminId == session?.user.id ? (
+
+									{member.id === session?.user.id ? (
 										<button
-											className="text-red-500"
+											className="text-blue-500"
 											onClick={() => {
 												setSelectedFamilyId(family.id);
 												setMemberToRemove(member);
 												setRemoveMemberModalOpen(true);
 											}}
 										>
-											Remove
+											Leave
 										</button>
-									) : null}
+									) : (
+										family.adminId === session?.user.id && (
+											<button
+												className="text-red-500"
+												onClick={() => {
+													setSelectedFamilyId(family.id);
+													setMemberToRemove(member);
+													setRemoveMemberModalOpen(true);
+												}}
+											>
+												Remove
+											</button>
+										)
+									)}
 								</li>
 							))}
 						</ul>
@@ -553,6 +608,7 @@ const FamilyList = () => {
 				onConfirm={handleRemoveMember}
 				memberName={memberToRemove?.name || ""}
 				memberUId={memberToRemove?.id || ""}
+				currentUid={session?.user.id || ""}
 			/>
 			<DeleteFamilyModal
 				isOpen={isDeleteFamilyModalOpen}

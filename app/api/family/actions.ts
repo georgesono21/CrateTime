@@ -49,7 +49,7 @@ export async function acceptFamilyInvitation(userId: string, familyId: string) {
                 connect: { id: familyId },
             },
             invitationsFamilyIds: {
-                set: (await prisma.user.findUnique({ where: { id: userId } }))?.invitationsFamilyIds.filter(id => id !== familyId || []),
+                set: (await prisma.user.findUnique({ where: { id: userId } }))?.invitationsFamilyIds.filter(id => id !== familyId),
             }
         }
     });
@@ -62,18 +62,10 @@ export async function acceptFamilyInvitation(userId: string, familyId: string) {
             },
             invitationToUserIds: {
                 set: family.invitationToUserIds.filter(id => id !== userId),
-            }
+            }   
         }
     });
 
-    await prisma.user.update({
-        where: { id: userId },
-        data: {
-            invitationsFamilyIds: {
-                set: (await prisma.user.findUnique({ where: { id: userId } }))?.invitationsFamilyIds.filter(id => id !== familyId || []),
-            }
-        }
-    });
 }
 
 // Reject an invitation to join a family
@@ -266,4 +258,76 @@ export async function updateFamilyName(familyId: string, newFamilyName: string) 
     });
 
     return updatedFamily;
+}
+export async function removeMemberFromFamily(
+    userId: string,
+    familyId: string,
+    adminId: string
+) {
+    // Find the family
+    const family = await prisma.family.findUnique({
+        where: { id: familyId },
+    });
+
+    if (!family) {
+        throw new Error(`Family with id ${familyId} not found.`);
+    }
+    // Find the user
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+    });
+
+    if (!user) {
+        throw new Error(`User with id ${userId} not found.`);
+    }
+
+    if (userId == adminId){ //leaving the family
+        
+        // Disconnect the user from the family
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                families: {
+                    disconnect: { id: familyId },
+                },
+            },
+        });
+
+        // Remove the user from familyMembers in the family record
+        await prisma.family.update({
+            where: { id: familyId },
+            data: {
+                familyMembers: {
+                    disconnect: { id: userId },
+                },
+            },
+        });
+        return
+    }
+
+    // Verify admin access
+    if (family.adminId !== adminId) {
+        throw new Error(`Unauthorized: Only admins can remove members from this family.`);
+    }
+
+    
+    // Disconnect the user from the family
+    await prisma.user.update({
+        where: { id: userId },
+        data: {
+            families: {
+                disconnect: { id: familyId },
+            },
+        },
+    });
+
+    // Remove the user from familyMembers in the family record
+    await prisma.family.update({
+        where: { id: familyId },
+        data: {
+            familyMembers: {
+                disconnect: { id: userId },
+            },
+        },
+    });
 }
