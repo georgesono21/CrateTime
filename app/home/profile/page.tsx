@@ -1,5 +1,5 @@
 "use client";
-import EditProfileModal from "@/components/modals/EditProfileModal";
+import EditProfileModal from "@/components/user/EditProfileModal";
 import React, { useState } from "react";
 
 // Functional component for Edit Profile Modal
