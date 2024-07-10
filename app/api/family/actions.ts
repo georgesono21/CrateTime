@@ -74,7 +74,7 @@ export async function rejectFamilyInvitation(userId: string, familyId: string) {
         where: { id: userId },
         data: {
             invitationsFamilyIds: {
-                set: (await prisma.user.findUnique({ where: { id: userId } }))?.invitationsFamilyIds.filter(id => id !== familyId || []),
+                set: (await prisma.user.findUnique({ where: { id: userId } }))?.invitationsFamilyIds.filter(id => id !== familyId),
             }
         }
     });
@@ -83,7 +83,7 @@ export async function rejectFamilyInvitation(userId: string, familyId: string) {
         where: { id: familyId },
         data: {
             invitationToUserIds: {
-                set: (await prisma.family.findUnique({ where: { id: familyId } }))?.invitationToUserIds.filter(id => id !== userId  || []),
+                set: (await prisma.family.findUnique({ where: { id: familyId } }))?.invitationToUserIds.filter(id => id !== userId),
             }
         }
     });
@@ -145,7 +145,7 @@ export async function retrieveUserFamilies(uId: string) {
       throw new Error(`User does not have a families array in user document or user DNE`);
     }
 
-    console.log(`retrieveUserFamily: uId: ${uId}: families: ${JSON.stringify(families, null, 2)}`);
+    // console.log(`retrieveUserFamily: uId: ${uId}: families: ${JSON.stringify(families, null, 2)}`);
     return families as Family[];
 }
 
@@ -159,12 +159,14 @@ export async function retrieveFamilyMembers(familyId: string) {
         throw new Error(`Family with id ${familyId} not found.`);
     }
     
-    console.log(family.familyMembers)
+    // console.log(family.familyMembers)
     return family.familyMembers;
 }
 
 export async function changeFamilyAdmin(newAdminId: string, currentUserId: string, familyId: string) {
     // Check if the current user is the admin of the family
+
+    console.log("changeFamilyAdmin", newAdminId, currentUserId, familyId)
     const family = await prisma.family.findUnique({
         where: { id: familyId },
     });

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
 	acceptFamilyInvitation,
+	changeFamilyAdmin,
 	createNewFamily,
 	deleteFamily,
 	getUserInvitations,
@@ -147,39 +148,49 @@ const RemoveMemberModal = ({
 	onConfirm,
 	memberName,
 	memberUId,
-	currentUid,
+	currentUId,
+	adminUId,
 }: {
 	isOpen: any;
 	onClose: any;
 	onConfirm: any;
 	memberName: string;
 	memberUId: string;
-	currentUid: string;
+	currentUId: string;
+	adminUId: string;
 }) => {
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
 			<h2 className="text-xl font-bold mb-4">
-				{currentUid != memberUId ? `Remove Member` : "Leave Family"}
+				{currentUId != memberUId ? `Remove Member` : "Leave Family"}
 			</h2>
-			<p>
-				{currentUid != memberUId
-					? `Are you sure you want to remove ${memberName} from the family?`
-					: "Are you sure you want to leave the family?"}
-			</p>
-			<div className="flex justify-end mt-4">
-				<button
-					className="bg-red-500 text-white px-4 py-2 rounded mr-2"
-					onClick={onConfirm}
-				>
-					{currentUid != memberUId ? `Remove` : "Leave"}
-				</button>
-				<button
-					className="bg-gray-500 text-white px-4 py-2 rounded"
-					onClick={onClose}
-				>
-					Cancel
-				</button>
-			</div>
+			{currentUId == adminUId ? (
+				<h1>
+					You must change the admin to another member or delete the family
+				</h1>
+			) : (
+				<>
+					<p>
+						{currentUId != memberUId
+							? `Are you sure you want to remove ${memberName} from the family?`
+							: "Are you sure you want to leave the family?"}
+					</p>
+					<div className="flex justify-end mt-4">
+						<button
+							className="bg-red-500 text-white px-4 py-2 rounded mr-2"
+							onClick={onConfirm}
+						>
+							{currentUId != memberUId ? `Remove` : "Leave"}
+						</button>
+						<button
+							className="bg-gray-500 text-white px-4 py-2 rounded"
+							onClick={onClose}
+						>
+							Cancel
+						</button>
+					</div>
+				</>
+			)}
 		</Modal>
 	);
 };
@@ -230,8 +241,8 @@ const ViewInvitationsModal = ({
 	isOpen: boolean;
 	onClose: () => void;
 	invitations: Family[];
-	onAccept: (familyId: string) => void;
-	onDecline: (familyId: string) => void;
+	onAccept: any;
+	onDecline: any;
 }) => {
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
@@ -262,17 +273,73 @@ const ViewInvitationsModal = ({
 	);
 };
 
+const ChangeAdminModal = ({
+	isOpen,
+	onClose,
+	onConfirm,
+	familyMembers,
+	currentAdminId,
+	setNewAdminId,
+}: {
+	isOpen: any;
+	onClose: any;
+	onConfirm: any;
+	familyMembers: User[];
+	currentAdminId: string;
+	setNewAdminId: any;
+}) => {
+	return (
+		<Modal isOpen={isOpen} onClose={onClose}>
+			<h2 className="text-xl font-bold mb-4">Change Admin</h2>
+			<p className="mb-4">Select a new admin from existing family members:</p>
+			<select
+				className="border p-2 mb-4 w-full"
+				onChange={(e) => setNewAdminId(e.target.value)}
+			>
+				<option value="">Select a new admin</option>
+				{familyMembers
+					.filter((member) => member.id !== currentAdminId)
+					.map((member) => (
+						<option key={member.id} value={member.id}>
+							{member.name} ({member.email})
+						</option>
+					))}
+			</select>
+			<div className="flex justify-end mt-4">
+				<button
+					className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+					onClick={async () => {
+						await onConfirm();
+						onClose();
+					}}
+				>
+					Change Admin
+				</button>
+				<button
+					className="bg-gray-500 text-white px-4 py-2 rounded"
+					onClick={onClose}
+				>
+					Cancel
+				</button>
+			</div>
+		</Modal>
+	);
+};
+
 const FamilyList = () => {
 	const [families, setFamilies] = useState<Family[]>([]);
 	const [editingFamily, setEditingFamily] = useState<Family | null>(null);
 	const [familyMembers, setFamilyMembers] = useState<{ [key: string]: User[] }>(
 		{}
 	);
+
+	const [newAdminId, setNewAdminId] = useState<string>("");
 	const [newFamilyName, setNewFamilyName] = useState<string>("");
 	const [isCreateModalOpen, setCreateModalOpen] = useState(false);
 	const [isAddMemberModalOpen, setAddMemberModalOpen] = useState(false);
 	const [isRemoveMemberModalOpen, setRemoveMemberModalOpen] = useState(false);
 	const [isDeleteFamilyModalOpen, setDeleteFamilyModalOpen] = useState(false);
+	const [isChangeAdminModalOpen, setChangeAdminModalOpen] = useState(false);
 	const [newMemberEmail, setNewMemberEmail] = useState<string>("");
 	const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
 	const [memberToRemove, setMemberToRemove] = useState<User | null>(null);
@@ -282,6 +349,22 @@ const FamilyList = () => {
 	const [invitations, setInvitations] = useState<Family[]>([]);
 
 	const { data: session } = useSession();
+
+	const getFamilyFromSelectedFamilyId = (): Family | undefined => {
+		if (!selectedFamilyId) {
+			return undefined;
+		}
+
+		return families.find((family) => family.id === selectedFamilyId);
+	};
+
+	const getAdminIdFromFamilyFromSelectedFamilyId = (): string => {
+		const family = getFamilyFromSelectedFamilyId();
+		if (family) {
+			return family.adminId;
+		}
+		return "";
+	};
 
 	const fetchFamilies = async () => {
 		if (session?.user?.id) {
@@ -353,6 +436,22 @@ const FamilyList = () => {
 			}
 		}
 	};
+	const handleAdminChange = async () => {
+		console.log("newAdminId: ", newAdminId);
+		if (session?.user?.id && newAdminId) {
+			try {
+				await changeFamilyAdmin(
+					newAdminId,
+					session?.user?.id,
+					selectedFamilyId || ""
+				);
+				await fetchFamilies();
+				setNewAdminId("");
+			} catch (error) {
+				console.error("Failed to change admin:", error);
+			}
+		}
+	};
 
 	const handleAddMember = async () => {
 		if (newMemberEmail.trim() !== "") {
@@ -362,6 +461,19 @@ const FamilyList = () => {
 
 				if (!userId) {
 					throw new Error(`User with email ${newMemberEmail} not found.`);
+				}
+
+				// Check if userId already exists in familyMembers
+				if (
+					familyMembers[selectedFamilyId || ""].some(
+						(member) => member.id === userId
+					)
+				) {
+					// User already exists in the family, close the modal
+					setNewMemberEmail("");
+					setAddMemberModalOpen(false);
+					setSelectedFamilyId(null);
+					return;
 				}
 
 				// Send invitation to the family
@@ -455,6 +567,7 @@ const FamilyList = () => {
 		setRemoveMemberModalOpen(false);
 		setDeleteFamilyModalOpen(false);
 		setViewInvitationsModalOpen(false);
+		setChangeAdminModalOpen(false);
 	};
 
 	return (
@@ -577,6 +690,18 @@ const FamilyList = () => {
 									Add Member
 								</button>
 							) : null}
+
+							{family.adminId == session?.user.id ? (
+								<button
+									className="btn btn-secondary"
+									onClick={() => {
+										setSelectedFamilyId(family.id);
+										setChangeAdminModalOpen(true);
+									}}
+								>
+									Change Admin
+								</button>
+							) : null}
 						</div>
 					</div>
 				))}
@@ -608,7 +733,8 @@ const FamilyList = () => {
 				onConfirm={handleRemoveMember}
 				memberName={memberToRemove?.name || ""}
 				memberUId={memberToRemove?.id || ""}
-				currentUid={session?.user.id || ""}
+				currentUId={session?.user.id || ""}
+				adminUId={getAdminIdFromFamilyFromSelectedFamilyId()}
 			/>
 			<DeleteFamilyModal
 				isOpen={isDeleteFamilyModalOpen}
@@ -622,6 +748,16 @@ const FamilyList = () => {
 				invitations={invitations}
 				onAccept={handleAcceptInvitation}
 				onDecline={handleDeclineInvitation}
+			/>
+			<ChangeAdminModal
+				isOpen={isChangeAdminModalOpen}
+				onClose={closeModal}
+				familyMembers={familyMembers[selectedFamilyId!] || []}
+				currentAdminId={getAdminIdFromFamilyFromSelectedFamilyId()}
+				currentUId={session?.user.id || ""}
+				onConfirm={handleAdminChange}
+				// newAdminId={newAdminId}
+				setNewAdminId={setNewAdminId}
 			/>
 		</div>
 	);
