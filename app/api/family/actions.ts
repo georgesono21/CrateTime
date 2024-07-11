@@ -57,12 +57,9 @@ export async function acceptFamilyInvitation(userId: string, familyId: string) {
     await prisma.family.update({
         where: { id: familyId },
         data: {
-            familyMembers: {
-                connect: { id: userId },
-            },
             invitationToUserIds: {
-                set: family.invitationToUserIds.filter(id => id !== userId),
-            }   
+                set: (await prisma.family.findUnique({ where: { id: familyId } }))?.invitationToUserIds.filter(id => id !== userId),
+            }
         }
     });
 
