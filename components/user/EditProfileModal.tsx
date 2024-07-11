@@ -1,4 +1,15 @@
-const EditProfileModal = ({
+import React from "react";
+
+interface EditProfileModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+	editingField: string;
+	editedValue: string;
+	onSave: () => void;
+	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const EditProfileModal: React.FC<EditProfileModalProps> = ({
 	isOpen,
 	onClose,
 	editingField,

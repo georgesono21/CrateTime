@@ -1,4 +1,16 @@
-const EditProfileModal = ({ isOpen, onClose, onConfirm }) => {
+import React from "react";
+
+interface DeleteProfileModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+	onConfirm: () => void;
+}
+
+const DeleteProfileModal: React.FC<DeleteProfileModalProps> = ({
+	isOpen,
+	onClose,
+	onConfirm,
+}) => {
 	if (!isOpen) return null;
 
 	return (
@@ -35,4 +47,4 @@ const EditProfileModal = ({ isOpen, onClose, onConfirm }) => {
 	);
 };
 
-export default EditProfileModal;
+export default DeleteProfileModal;
