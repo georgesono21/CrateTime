@@ -15,7 +15,7 @@ function page() {
 	const { data: session } = useSession();
 
 	if (session) {
-		console.log("use Session ", session);
+		// console.log("use Session ", session);
 		redirect("/home");
 	}
 

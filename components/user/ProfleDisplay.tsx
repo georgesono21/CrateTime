@@ -66,7 +66,7 @@ const ProfileDisplay = () => {
 			try {
 				await deleteAccount(user.id);
 				// Perform any additional cleanup or logout if needed
-				console.log("Account deleted successfully.");
+				// console.log("Account deleted successfully.");
 			} catch (error) {
 				console.error("Error deleting account:", error);
 			}

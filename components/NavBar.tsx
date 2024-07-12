@@ -17,14 +17,14 @@ const NavBar = () => {
 					</Link>
 
 					<Link
-						href="/"
+						href="/home"
 						className="sm:text-base md:text-xl lg:text-xl btn btn-ghost  text-center"
 					>
 						Home
 					</Link>
 
 					<Link
-						href="/"
+						href="/home/pets"
 						className="sm:text-base md:text-xl lg:text-xl btn btn-ghost  text-center"
 					>
 						Pets

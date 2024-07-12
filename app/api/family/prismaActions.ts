@@ -2,6 +2,7 @@
 
 import prisma from "@/app/libs/prismadb";
 import { Family } from "@prisma/client";
+import { retrieveUserFamiliesMongo } from "./mongoActions";
 
 // Send an invitation to join a family
 export async function sendFamilyInvitation(familyId: string, userId: string) {
@@ -120,6 +121,8 @@ export async function createNewFamily(uId: string, newFamilyName: string) {
 }
 
 export async function retrieveUserFamilies(uId: string) {
+
+    // retrieveUserFamiliesMongo(uId);
     const user = await prisma.user.findUnique({
       where: { id: uId },
       include: { families: true },
@@ -163,7 +166,7 @@ export async function retrieveFamilyMembers(familyId: string) {
 export async function changeFamilyAdmin(newAdminId: string, currentUserId: string, familyId: string) {
     // Check if the current user is the admin of the family
 
-    console.log("changeFamilyAdmin", newAdminId, currentUserId, familyId)
+    // console.log("changeFamilyAdmin", newAdminId, currentUserId, familyId)
     const family = await prisma.family.findUnique({
         where: { id: familyId },
     });

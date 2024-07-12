@@ -114,6 +114,36 @@ const FamilyList = () => {
 		fetchInvitations();
 	}, [session?.user?.id]);
 
+	useEffect(() => {
+		const eventSource = new EventSource(`/api/events`);
+		eventSource.onopen = (e) => {
+			console.log("server open ready");
+			console.log(
+				`eventSource onopen: families: ${JSON.stringify(
+					families
+				)} invites: ${JSON.stringify(
+					invitations
+				)} familymembers ${JSON.stringify(familyMembers)}`
+			);
+		};
+		eventSource.onmessage = async (e) => {
+			console.log("onmessage");
+			// console.log(e);
+			await fetchFamilies();
+			await fetchInvitations();
+			families.forEach(async (family) => {
+				await fetchFamilyMembers(family.id);
+			});
+
+			console.log(
+				`eventSource onMESSAGE: families: ${JSON.stringify(
+					families
+				)} invites: ${JSON.stringify(
+					invitations
+				)} familymembers ${JSON.stringify(familyMembers)}`
+			);
+		};
+	}, []);
 	const handleDelete = async (id: string) => {
 		await deleteFamily(id);
 		setFamilies(families.filter((family) => family.id !== id));
@@ -137,7 +167,7 @@ const FamilyList = () => {
 		}
 	};
 	const handleAdminChange = async () => {
-		// console.log("newAdminId: ", newAdminId);
+		console.log("newAdminId: ", newAdminId);
 		if (session?.user?.id && newAdminId) {
 			try {
 				await changeFamilyAdmin(

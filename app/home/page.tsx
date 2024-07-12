@@ -10,7 +10,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import prisma from "../libs/prismadb";
-import { createNewFamily } from "../api/family/actions";
+import { createNewFamily } from "../api/family/prismaActions";
 // import { createNewFamily } from "../libs/dbFuncs";
 
 export default function Home() {

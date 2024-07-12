@@ -7,7 +7,6 @@ import bcrypt from 'bcrypt'
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Adapter } from "next-auth/adapters";
 import prisma from "@/app/libs/prismadb";
-import { createNewFamily } from "@/app/libs/dbFuncs";
 
 const handler = NextAuth({
   providers: [

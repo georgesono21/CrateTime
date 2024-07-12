@@ -22,7 +22,7 @@ const RemoveMemberModal = ({
 			<h2 className="text-xl font-bold mb-4">
 				{currentUId != memberUId ? `Remove Member` : "Leave Family"}
 			</h2>
-			{currentUId == adminUId ? (
+			{currentUId == adminUId && currentUId == memberUId ? (
 				<h1>
 					You must change the admin to another member or delete the family
 				</h1>
