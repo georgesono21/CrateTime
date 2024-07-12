@@ -131,9 +131,6 @@ const FamilyList = () => {
 			// console.log(e);
 			await fetchFamilies();
 			await fetchInvitations();
-			families.forEach(async (family) => {
-				await fetchFamilyMembers(family.id);
-			});
 
 			console.log(
 				`eventSource onMESSAGE: families: ${JSON.stringify(
@@ -142,6 +139,11 @@ const FamilyList = () => {
 					invitations
 				)} familymembers ${JSON.stringify(familyMembers)}`
 			);
+		};
+
+		return () => {
+			eventSource.close();
+			console.log("EventSource connection closed");
 		};
 	}, []);
 	const handleDelete = async (id: string) => {

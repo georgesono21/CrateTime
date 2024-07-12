@@ -25,7 +25,15 @@
 
 // watchCollections()
 
+import { MongoClient } from 'mongodb';
 
+const uri = process.env.DATABASE_URL!;
+const options = {};
 
+let mongoClient = new MongoClient(uri, options)
 
-// export default mongoClient;
+export async function connectMongoClient() {
+  await mongoClient.connect();
+}
+
+export default mongoClient;
