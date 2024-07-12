@@ -33,6 +33,8 @@ const FamilyList = () => {
 		{}
 	);
 
+	const [update, setUpdate] = useState<boolean>(false);
+
 	const [newAdminId, setNewAdminId] = useState<string>("");
 	const [newFamilyName, setNewFamilyName] = useState<string>("");
 	const [isCreateModalOpen, setCreateModalOpen] = useState(false);
@@ -71,6 +73,13 @@ const FamilyList = () => {
 			try {
 				const fetchedFamilies = await retrieveUserFamilies(session.user.id);
 				setFamilies(fetchedFamilies);
+				fetchedFamilies.forEach((family: any) => {
+					// console.log(`forEach:  ${JSON.stringify(family.familyMembers)}`);
+					setFamilyMembers((prevMembers) => ({
+						...prevMembers,
+						[family.id]: family.familyMembers,
+					}));
+				});
 			} catch (error) {
 				console.error("Failed to retrieve families:", error);
 			}
@@ -88,57 +97,47 @@ const FamilyList = () => {
 		}
 	};
 
-	const fetchFamilyMembers = async (familyId: string) => {
-		try {
-			const members = await retrieveFamilyMembers(familyId);
-			setFamilyMembers((prevMembers) => ({
-				...prevMembers,
-				[familyId]: members,
-			}));
-		} catch (error) {
-			console.error(
-				`Failed to retrieve members for family ${familyId}:`,
-				error
-			);
-		}
+	const fetchData = async () => {
+		await fetchFamilies();
+		await fetchInvitations();
+		// console.log(`fetchData: families: ${JSON.stringify(families)}`);
 	};
 
 	useEffect(() => {
-		families.forEach((family) => {
-			fetchFamilyMembers(family.id);
-		});
-	}, [families]);
+		fetchData();
+	}, [session?.user.id]);
+
+	// useEffect(() => {
+	// 	console.log(`update: ${update}`);
+	// }, [update]);
 
 	useEffect(() => {
-		fetchFamilies();
-		fetchInvitations();
-	}, [session?.user?.id]);
-
-	useEffect(() => {
-		const eventSource = new EventSource(`/api/events`);
+		const eventSource = new EventSource(`/api/family`);
 		eventSource.onopen = (e) => {
 			console.log("server open ready");
-			console.log(
-				`eventSource onopen: families: ${JSON.stringify(
-					families
-				)} invites: ${JSON.stringify(
-					invitations
-				)} familymembers ${JSON.stringify(familyMembers)}`
-			);
+			// console.log(
+			// 	`eventSource onopen: families: ${JSON.stringify(
+			// 		families
+			// 	)} invites: ${JSON.stringify(
+			// 		invitations
+			// 	)} familymembers ${JSON.stringify(familyMembers)}`
+			// );
+			// fetchData();
 		};
 		eventSource.onmessage = async (e) => {
 			console.log("onmessage");
-			// console.log(e);
-			await fetchFamilies();
-			await fetchInvitations();
 
-			console.log(
-				`eventSource onMESSAGE: families: ${JSON.stringify(
-					families
-				)} invites: ${JSON.stringify(
-					invitations
-				)} familymembers ${JSON.stringify(familyMembers)}`
-			);
+			// console.log(
+			// 	`eventSource onMESSAGE: families: ${JSON.stringify(
+			// 		families
+			// 	)} invites: ${JSON.stringify(
+			// 		invitations
+			// 	)} familymembers ${JSON.stringify(familyMembers)}`
+			// );
+
+			fetchData();
+			// setUpdate(!update);
+			console.log(`onmessage: ${update}`);
 		};
 
 		return () => {
@@ -146,6 +145,7 @@ const FamilyList = () => {
 			console.log("EventSource connection closed");
 		};
 	}, []);
+
 	const handleDelete = async (id: string) => {
 		await deleteFamily(id);
 		setFamilies(families.filter((family) => family.id !== id));
@@ -169,7 +169,7 @@ const FamilyList = () => {
 		}
 	};
 	const handleAdminChange = async () => {
-		console.log("newAdminId: ", newAdminId);
+		// console.log("newAdminId: ", newAdminId);
 		if (session?.user?.id && newAdminId) {
 			try {
 				await changeFamilyAdmin(
@@ -217,7 +217,6 @@ const FamilyList = () => {
 				setSelectedFamilyId(null);
 
 				// Optionally refresh family members after adding new member
-				await fetchFamilyMembers(selectedFamilyId!);
 			} catch (error) {
 				console.error("Failed to add member to family:", error);
 			}
@@ -314,7 +313,7 @@ const FamilyList = () => {
 				<button
 					className="btn btn-ghost text-xl text-center dark:text-white btn-outline mb-5"
 					onClick={async () => {
-						await fetchFamilies();
+						// await fetchFamilies();
 						setViewInvitationsModalOpen(true);
 					}}
 				>

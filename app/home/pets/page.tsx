@@ -1,5 +1,6 @@
 "use client";
 import FamiliesListWithSSE from "@/components/family/FamiliesListWithSSE";
+import PetList from "@/components/pet/PetList";
 import { useEffect } from "react";
 
 const Home = () => {
@@ -15,10 +16,9 @@ const Home = () => {
 	// }, []);
 
 	return (
-		<div>
-			<h1>Server-Sent Events Example</h1>
-			<p>Check console for updates.</p>
-			<FamiliesListWithSSE />
+		<div className="bg-base-300 flex min-h-screen flex-col items-center p-10">
+			<h1 className="text-3xl font-semibold mb-1 ">Pet Overview</h1>
+			<PetList />
 		</div>
 	);
 };

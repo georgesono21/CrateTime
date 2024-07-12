@@ -1,123 +1,52 @@
 'use server';
 
 import prisma from "@/app/libs/prismadb";
-import { Family } from "@prisma/client";
-import { retrieveUserFamiliesMongo } from "./mongoActions";
+import { Family, Pet } from "@prisma/client";
 
-// Send an invitation to join a family
-export async function sendFamilyInvitation(familyId: string, userId: string, ) {
+
+export async function createNewPet(uId: string, familyId: string, petInfo: Pet) {
     const family = await prisma.family.findUnique({
-        where: { id: familyId },
+        where: { id: familyId }
     });
 
-    if (!family) {
-        throw new Error(`Family with id ${familyId} not found.`);
-    }
-
-    await prisma.family.update({
-        where: { id: familyId },
-        data: {
-            invitationToUserIds: {
-                push: userId
-            }
-        }
-    });
-
-    await prisma.user.update({
-        where: { id: userId },
-        data: {
-            invitationsFamilyIds: {
-                push: familyId
-            }
-        }
-    });
-}
-
-// Accept an invitation to join a family
-export async function acceptFamilyInvitation(userId: string, familyId: string) {
-    const family = await prisma.family.findUnique({
-        where: { id: familyId },
-    });
-
-    if (!family) {
-        throw new Error(`Family with id ${familyId} not found.`);
-    }
-
-    await prisma.user.update({
-        where: { id: userId },
-        data: {
-            families: {
-                connect: { id: familyId },
-            },
-            invitationsFamilyIds: {
-                set: (await prisma.user.findUnique({ where: { id: userId } }))?.invitationsFamilyIds.filter(id => id !== familyId),
-            }
-        }
-    });
-
-    await prisma.family.update({
-        where: { id: familyId },
-        data: {
-            invitationToUserIds: {
-                set: (await prisma.family.findUnique({ where: { id: familyId } }))?.invitationToUserIds.filter(id => id !== userId),
-            }
-        }
-    });
-
-}
-
-// Reject an invitation to join a family
-export async function rejectFamilyInvitation(userId: string, familyId: string) {
-    await prisma.user.update({
-        where: { id: userId },
-        data: {
-            invitationsFamilyIds: {
-                set: (await prisma.user.findUnique({ where: { id: userId } }))?.invitationsFamilyIds.filter(id => id !== familyId),
-            }
-        }
-    });
-
-    await prisma.family.update({
-        where: { id: familyId },
-        data: {
-            invitationToUserIds: {
-                set: (await prisma.family.findUnique({ where: { id: familyId } }))?.invitationToUserIds.filter(id => id !== userId),
-            }
-        }
-    });
-}
-
-// Retrieve the invitations sent to a user
-export async function getUserInvitations(userId: string) {
     const user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: { invites: true },
+        where: { id: uId }
     });
+
+    if (!family) {
+        throw new Error(`Family with id ${familyId} does not exist.`);
+    }
 
     if (!user) {
-        throw new Error(`User with id ${userId} not found.`);
+        throw new Error(`User with id ${uId} does not exist`);
     }
 
-    return user.invites;
-}
+    if (family.adminId !== user.id) {
+        throw new Error(`User with id ${uId} is not authorized to create pet`);
+    }
 
-// Other family-related functions
-export async function createNewFamily(uId: string, newFamilyName: string) {
-    const family = await prisma.family.create({
+    petInfo.familyId = familyId;
+
+    const createdPet = await prisma.pet.create({
         data: {
-            name: newFamilyName, // Replace with actual family name or data
-            adminId: uId
-        },
+            name: petInfo.name,
+            familyId: petInfo.familyId
+        }
     });
 
-    await prisma.user.update({
-        where: { id: uId },
+    // Connect the newly created pet to the family
+    await prisma.family.update({
+        where: { id: familyId },
         data: {
-            families: {
-                connect: { id: family.id }, // Connect the user to the new family
-            },
-        },
+            pets: {
+                connect: { id: createdPet.id }
+            }
+        }
     });
+
+    // console.log(`Pet created: ${JSON.stringify(createdPet)}`);
+
+    return createdPet;
 }
 
 export async function retrieveUserFamilies(uId: string) {
@@ -125,7 +54,9 @@ export async function retrieveUserFamilies(uId: string) {
     // retrieveUserFamiliesMongo(uId);
     const user = await prisma.user.findUnique({
       where: { id: uId },
-      include: { families: true },
+      include: { families: true 
+                
+      },
     });
 
     if (!user) {
@@ -135,7 +66,7 @@ export async function retrieveUserFamilies(uId: string) {
     const families = await Promise.all(user.families.map(async (family) => {
       const fullFamily = await prisma.family.findUnique({
         where: { id: family.id },
-        include: { familyMembers: true, admin: true },
+        include: { familyMembers: true, admin: true , pets: true},
       });
 
       return fullFamily;

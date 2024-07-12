@@ -2,7 +2,9 @@
 import client from '@/app/libs/mongodb';
 import { Family } from '@prisma/client';
 import { ObjectId } from 'mongodb';
-export async function retrieveUserFamiliesMongo(uId: string): Promise<Family[]> {
+
+
+async function retrieveUserFamiliesMongo(uId: string): Promise<Family[]> {
   const db = client.db('dev'); // Use your database name here
 
   const families = await db.collection('Family').aggregate([
@@ -59,6 +61,18 @@ export async function retrieveUserFamiliesMongo(uId: string): Promise<Family[]> 
 
   return families as Family[];
 }
+
+
+// export async function GET(req: NextRequest) {
+ 
+//   return new Response(readable, {
+//     headers: {
+//       'Content-Type': 'text/event-stream',
+//       'Cache-Control': 'no-cache',
+//       'Connection': 'keep-alive',
+//     },
+//   });
+// }
 
 
 export async function retrieveUserFamiliesWithMongo(uId: string){

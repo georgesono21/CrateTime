@@ -31,11 +31,12 @@ model User {
 }
 
 model Pet {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String?
-  image     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String?
+  image       String?
+  dateOfBirth DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   familyId String @db.ObjectId
   Task     Task[]
