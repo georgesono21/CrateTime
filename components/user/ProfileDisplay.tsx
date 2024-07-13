@@ -52,7 +52,8 @@ const ProfileDisplay = () => {
 				const updatedUser = await updateUserDocument(user.id, {
 					[editingField]: newValue,
 				});
-				setUser(updatedUser as ProfileUser);
+				// setUser(updatedUser as ProfileUser);
+				await retrieveUser(user.id);
 			} catch (error) {
 				console.error("Error updating user:", error);
 			}

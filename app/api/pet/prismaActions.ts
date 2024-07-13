@@ -4,7 +4,17 @@ import prisma from "@/app/libs/prismadb";
 import { Family, Pet } from "@prisma/client";
 
 
+  const parseDate = (date: string | Date): Date => {
+    if (typeof date === "string") {
+      return new Date(date);
+    } else {
+      return date;
+    }
+  };
+
 export async function createNewPet(uId: string, familyId: string, petInfo: Pet) {
+    
+
     const family = await prisma.family.findUnique({
         where: { id: familyId }
     });
@@ -25,12 +35,19 @@ export async function createNewPet(uId: string, familyId: string, petInfo: Pet) 
         throw new Error(`User with id ${uId} is not authorized to create pet`);
     }
 
+    if (petInfo.id != ""){
+        await editPet(uId, familyId, petInfo)
+        return;
+    }
+
     petInfo.familyId = familyId;
+    
 
     const createdPet = await prisma.pet.create({
         data: {
             name: petInfo.name,
-            familyId: petInfo.familyId
+            familyId: petInfo.familyId,
+            dateOfBirth: parseDate(petInfo.dateOfBirth)
         }
     });
 
@@ -43,6 +60,52 @@ export async function createNewPet(uId: string, familyId: string, petInfo: Pet) 
             }
         }
     });
+
+    // console.log(`Pet created: ${JSON.stringify(createdPet)}`);
+
+    return createdPet;
+}
+
+
+export async function editPet(uId: string, familyId: string, petInfo: Pet) {
+    
+    const pet = await prisma.pet.findUnique({
+        where: {id: petInfo.id}
+    });
+
+    const family = await prisma.family.findUnique({
+        where: { id: familyId }
+    });
+
+    const user = await prisma.user.findUnique({
+        where: { id: uId }
+    });
+
+    if (!family) {
+        throw new Error(`Family with id ${familyId} does not exist.`);
+    }
+
+    if (!user) {
+        throw new Error(`User with id ${uId} does not exist`);
+    }
+
+    if (family.adminId !== user.id) {
+        throw new Error(`User with id ${uId} is not authorized to create pet`);
+    }
+
+    
+    
+    const createdPet = await prisma.pet.update({
+        where: {id: petInfo.id},
+        data: {
+            name: petInfo.name,
+            familyId: petInfo.familyId,
+            image: petInfo.image,
+            dateOfBirth: parseDate(petInfo.dateOfBirth)
+
+        }
+    });
+
 
     // console.log(`Pet created: ${JSON.stringify(createdPet)}`);
 
@@ -192,11 +255,12 @@ export async function updateFamilyName(familyId: string, newFamilyName: string) 
 
     return updatedFamily;
 }
-export async function removeMemberFromFamily(
+export async function deletePet(
     userId: string,
-    familyId: string,
+    pet: Pet,
     adminId: string
 ) {
+    const familyId = pet.familyId
     // Find the family
     const family = await prisma.family.findUnique({
         where: { id: familyId },
@@ -214,53 +278,23 @@ export async function removeMemberFromFamily(
         throw new Error(`User with id ${userId} not found.`);
     }
 
-    if (userId == adminId){ //leaving the family
-        
-        // Disconnect the user from the family
-        await prisma.user.update({
-            where: { id: userId },
-            data: {
-                families: {
-                    disconnect: { id: familyId },
-                },
-            },
-        });
-
-        // Remove the user from familyMembers in the family record
-        await prisma.family.update({
-            where: { id: familyId },
-            data: {
-                familyMembers: {
-                    disconnect: { id: userId },
-                },
-            },
-        });
-        return
-    }
-
     // Verify admin access
     if (family.adminId !== adminId) {
         throw new Error(`Unauthorized: Only admins can remove members from this family.`);
     }
-
-    
-    // Disconnect the user from the family
-    await prisma.user.update({
-        where: { id: userId },
-        data: {
-            families: {
-                disconnect: { id: familyId },
-            },
-        },
-    });
+    // Disconnect the pet from the family
 
     // Remove the user from familyMembers in the family record
     await prisma.family.update({
         where: { id: familyId },
         data: {
-            familyMembers: {
-                disconnect: { id: userId },
+            pets: {
+                disconnect: { id: pet.id },
             },
         },
     });
+
+    await prisma.pet.delete({
+        where: {id: pet.id}
+    })
 }

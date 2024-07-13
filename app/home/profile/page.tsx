@@ -1,5 +1,5 @@
 import EditProfileModal from "@/components/user/EditProfileModal";
-import ProfileDisplay from "@/components/user/ProfleDisplay";
+import ProfileDisplay from "@/components/user/ProfileDisplay";
 import React, { useState } from "react";
 
 // Functional component for Edit Profile Modal

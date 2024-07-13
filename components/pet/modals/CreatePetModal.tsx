@@ -20,11 +20,12 @@ const CreatePetModal = ({
 		setNewPet((prev: Pet) => ({ ...prev, [name]: value }));
 	};
 
-	const formatDate = (date: Date): string => {
-		const ISODate = date.toISOString();
-
-		const formattedDate = ISODate.split("T")[0]; // Splitting on 'T' and taking the first part (the date part)
-		return formattedDate;
+	const formatDate = (date: string | Date): string => {
+		if (typeof date === "string") {
+			return date;
+		} else {
+			return date.toISOString().split("T")[0];
+		}
 	};
 
 	return (
@@ -50,12 +51,11 @@ const CreatePetModal = ({
 				className="border p-2 mb-4 w-full"
 				placeholder="Image URL"
 			/>
-
 			<h1> Date of Birth (DOB)</h1>
 			<input
 				type="date"
 				name="dateOfBirth"
-				value={formatDate(newPet.dateOfBirth) || ""}
+				value={newPet.dateOfBirth ? formatDate(newPet.dateOfBirth) : ""}
 				onChange={handleChange}
 				className="border p-2 mb-4 w-full"
 				placeholder="Date of Birth"

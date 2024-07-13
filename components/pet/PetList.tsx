@@ -1,11 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { retrieveUserFamilies } from "@/app/api/pet/prismaActions";
+import { deletePet, retrieveUserFamilies } from "@/app/api/pet/prismaActions";
 import { Family, Pet, User } from "@prisma/client";
 import CreatePetModal from "./modals/CreatePetModal";
 import { isNull } from "util";
 import { createNewPet } from "@/app/api/pet/prismaActions";
+import RemovePetModal from "./modals/RemovePet";
 
 const PetList = () => {
 	const [families, setFamilies] = useState<Family[]>([]);
@@ -31,10 +32,30 @@ const PetList = () => {
 	const [isCreatePetModalOpen, setCreatePetModalOpen] =
 		useState<boolean>(false);
 
+	const [isRemovePetModalOpen, setRemovePetModalOpen] =
+		useState<boolean>(false);
+
 	const { data: session } = useSession();
+
+	const getFamilyFromSelectedFamilyId = (): Family | undefined => {
+		if (!selectedFamilyId) {
+			return undefined;
+		}
+
+		return families.find((family) => family.id === selectedFamilyId);
+	};
+
+	const getAdminIdFromFamilyFromSelectedFamilyId = (): string => {
+		const family = getFamilyFromSelectedFamilyId();
+		if (family) {
+			return family.adminId;
+		}
+		return "";
+	};
 
 	const closeModal = () => {
 		setCreatePetModalOpen(false);
+		setRemovePetModalOpen(false);
 	};
 
 	const fetchFamilies = async () => {
@@ -42,7 +63,7 @@ const PetList = () => {
 			try {
 				const fetchedFamilies = await retrieveUserFamilies(session.user.id);
 				setFamilies(fetchedFamilies);
-				console.log("fetchedFamilies ", JSON.stringify(fetchedFamilies));
+				// console.log("fetchedFamilies ", JSON.stringify(fetchedFamilies));
 				fetchedFamilies.forEach((family: any) => {
 					setFamilyMembers((prevMembers) => ({
 						...prevMembers,
@@ -70,6 +91,22 @@ const PetList = () => {
 		fetchData();
 	}, [session?.user.id]);
 
+	useEffect(() => {
+		const eventSource = new EventSource(`/api/family`);
+		eventSource.onopen = (e) => {
+			console.log("pet server open ready");
+		};
+		eventSource.onmessage = async (e) => {
+			console.log("onmessage");
+			fetchData();
+		};
+
+		return () => {
+			eventSource.close();
+			console.log("EventSource connection closed");
+		};
+	}, []);
+
 	const handleCreatePet = async () => {
 		// Logic to create pet
 		console.log(
@@ -77,6 +114,43 @@ const PetList = () => {
 		);
 
 		await createNewPet(session?.user.id || "", selectedFamilyId || "", newPet);
+		fetchData();
+		setNewPet({
+			id: "",
+			name: "",
+			image: "",
+			dateOfBirth: new Date(),
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			familyId: "",
+			ignore: [],
+		} as Pet);
+		setSelectedFamilyId(null);
+	};
+
+	const handleRemovePet = async () => {
+		// Logic to create pet
+		console.log(
+			`newPet: ${JSON.stringify(newPet)} selectedFamilyId: ${selectedFamilyId}`
+		);
+
+		await deletePet(
+			session?.user.id || "",
+			newPet,
+			getAdminIdFromFamilyFromSelectedFamilyId()
+		);
+		fetchData();
+		setNewPet({
+			id: "",
+			name: "",
+			image: "",
+			dateOfBirth: new Date(),
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			familyId: "",
+			ignore: [],
+		} as Pet);
+		setSelectedFamilyId(null);
 	};
 
 	return (
@@ -105,27 +179,57 @@ const PetList = () => {
 								  })`
 								: "Unknown"}
 						</p>
-						<h3 className="font-semibold mb-2">Pets:</h3>
+						<h3 className="font-semibold mb-2">Members:</h3>
 						<ul>
-							{!familyPets[family.id] && (
-								<div>
-									<h1 className=" text-slate-300 italic">
-										{" "}
-										No pets created yet.
-									</h1>
-								</div>
-							)}
+							{familyMembers[family.id]?.map((member) => (
+								<li key={member.id} className="flex gap-4">
+									<p>
+										{member.name} ({member.email})
+									</p>
+								</li>
+							))}
+						</ul>
+						<h3 className="font-semibold my-2">Pets:</h3>
+						<ul>
+							{!familyPets[family.id] ||
+								(familyPets[family.id].length == 0 && (
+									<div>
+										<h1 className=" text-slate-300 italic">
+											{" "}
+											No pets created yet.
+										</h1>
+									</div>
+								))}
 							{familyPets[family.id]?.map((pet) => (
 								<li key={pet.id} className="flex gap-4">
-									<p>{pet.name}</p>
+									{/* <p>{JSON.stringify(pet)}</p> */}
+									<p>
+										{pet.name} ({JSON.stringify(pet.dateOfBirth)})
+									</p>
 
 									{family.adminId === session?.user.id && (
-										<button
-											className="text-red-500"
-											onClick={() => setSelectedFamilyId(family.id)}
-										>
-											Remove Pet
-										</button>
+										<div>
+											<button
+												className="text-blue-500 mr-5"
+												onClick={() => {
+													setSelectedFamilyId(family.id);
+													setNewPet(pet);
+													setCreatePetModalOpen(true);
+												}}
+											>
+												Edit
+											</button>
+											<button
+												className="text-red-500"
+												onClick={() => {
+													setSelectedFamilyId(family.id);
+													setNewPet(pet);
+													setRemovePetModalOpen(true);
+												}}
+											>
+												Remove Pet
+											</button>
+										</div>
 									)}
 								</li>
 							))}
@@ -150,6 +254,15 @@ const PetList = () => {
 				onConfirm={handleCreatePet}
 				newPet={newPet}
 				setNewPet={setNewPet}
+			/>
+
+			<RemovePetModal
+				isOpen={isRemovePetModalOpen}
+				onClose={closeModal}
+				onConfirm={handleRemovePet}
+				pet={newPet}
+				currentUId={session?.user.id || ""}
+				adminUId={getAdminIdFromFamilyFromSelectedFamilyId()}
 			/>
 		</div>
 	);
