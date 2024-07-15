@@ -303,16 +303,16 @@ const FamilyList = () => {
 	};
 
 	return (
-		<div className="m-8 flex-col justify-center">
-			<div className="flex justify-center items-center gap-4">
+		<div className="m-8 mx-4 flex-col justify-center">
+			<div className="flex-wrap justify-center items-center gap-4 ">
 				<button
-					className="btn btn-ghost text-xl text-center dark:text-white btn-outline mb-5"
+					className="btn btn-ghost text-xl text-center dark:text-white btn-outline m-2"
 					onClick={() => setCreateModalOpen(true)}
 				>
 					Create New Family
 				</button>
 				<button
-					className="btn btn-ghost text-xl text-center dark:text-white btn-outline mb-5"
+					className="btn btn-ghost text-xl text-center dark:text-white btn-outline mb-5 m-2"
 					onClick={async () => {
 						// await fetchFamilies();
 						setViewInvitationsModalOpen(true);
@@ -388,10 +388,10 @@ const FamilyList = () => {
 								</li>
 							))}
 						</ul>
-						<div className="flex gap-4 mt-4">
+						<div className="flex-wrap mt-4">
 							{family.adminId == session?.user.id ? (
 								<button
-									className="btn btn-primary"
+									className="btn btn-primary m-2"
 									onClick={() => handleEdit(family)}
 								>
 									Edit
@@ -400,7 +400,7 @@ const FamilyList = () => {
 
 							{family.adminId == session?.user.id ? (
 								<button
-									className="btn btn-error bg-red-400"
+									className="btn btn-error bg-red-400 m-2"
 									onClick={() => {
 										setFamilyToDelete(family);
 										setDeleteFamilyModalOpen(true);
@@ -412,7 +412,7 @@ const FamilyList = () => {
 
 							{family.adminId == session?.user.id ? (
 								<button
-									className="btn btn-secondary"
+									className="btn btn-secondary m-2"
 									onClick={() => {
 										setSelectedFamilyId(family.id);
 										setAddMemberModalOpen(true);
@@ -424,7 +424,7 @@ const FamilyList = () => {
 
 							{family.adminId == session?.user.id ? (
 								<button
-									className="btn btn-secondary"
+									className="btn btn-secondary m-2"
 									onClick={() => {
 										setSelectedFamilyId(family.id);
 										setChangeAdminModalOpen(true);
