@@ -7,6 +7,8 @@ import CreatePetModal from "./modals/CreatePetModal";
 import { isNull } from "util";
 import { createNewPet } from "@/app/api/pet/prismaActions";
 import RemovePetModal from "./modals/RemovePet";
+import PetPhotoNameDisplay from "./PetPhotoNameDisplay";
+import MiniUserProfileView from "../user/MiniUserProfileView";
 
 const PetList = () => {
 	const [families, setFamilies] = useState<Family[]>([]);
@@ -165,21 +167,19 @@ const PetList = () => {
 						<h2 className="text-xl font-semibold mb-2">{family.name}</h2>
 						<p className="text-sm mb-2">
 							Admin:{" "}
-							{familyMembers[family.id]?.find(
-								(member) => member.id === family.adminId
-							)
-								? `${
-										familyMembers[family.id].find(
-											(member) => member.id === family.adminId
-										)?.name
-								  } (${
-										familyMembers[family.id].find(
-											(member) => member.id === family.adminId
-										)?.email
-								  })`
-								: "Unknown"}
+							<MiniUserProfileView
+								user={
+									familyMembers[family.id]?.find(
+										(member) => member.id === family.adminId
+									)
+										? familyMembers[family.id].find(
+												(member) => member.id === family.adminId
+										  )
+										: undefined // Provide a default user object if admin is unknown
+								}
+							/>
 						</p>
-						<h3 className="font-semibold mb-2">Members:</h3>
+						{/* <h3 className="font-semibold mb-2">Members:</h3>
 						<ul>
 							{familyMembers[family.id]?.map((member) => (
 								<li key={member.id} className="flex gap-4">
@@ -188,7 +188,7 @@ const PetList = () => {
 									</p>
 								</li>
 							))}
-						</ul>
+						</ul> */}
 						<h3 className="font-semibold my-2">Pets:</h3>
 						<ul>
 							{!familyPets[family.id] ||
@@ -204,11 +204,11 @@ const PetList = () => {
 								<li key={pet.id} className="flex gap-4">
 									{/* <p>{JSON.stringify(pet)}</p> */}
 									<p>
-										{pet.name} ({JSON.stringify(pet.dateOfBirth)})
+										<PetPhotoNameDisplay pet={pet} />
 									</p>
 
 									{family.adminId === session?.user.id && (
-										<div>
+										<div className="flex justify-center">
 											<button
 												className="text-blue-500 mr-5"
 												onClick={() => {
@@ -242,7 +242,7 @@ const PetList = () => {
 									setCreatePetModalOpen(true);
 								}}
 							>
-								Add Pet
+								Add New Pet
 							</button>
 						)}
 					</div>

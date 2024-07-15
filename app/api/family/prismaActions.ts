@@ -2,7 +2,6 @@
 
 import prisma from "@/app/libs/prismadb";
 import { Family } from "@prisma/client";
-import { retrieveUserFamiliesMongo } from "./mongoActions";
 
 // Send an invitation to join a family
 export async function sendFamilyInvitation(familyId: string, userId: string, ) {
@@ -211,7 +210,9 @@ export async function deleteFamily(familyId: string) {
     // Find the family and its members
     const family = await prisma.family.findUnique({
         where: { id: familyId },
-        include: { familyMembers: true },
+        include: { familyMembers: true ,
+                    pets: true
+        },
     });
 
     if (!family) {
@@ -226,6 +227,12 @@ export async function deleteFamily(familyId: string) {
                     set: member.familyIds.filter((id) => id !== familyId),
                 },
             },
+        });
+    }
+
+    for (const pet of family.pets) {
+        await prisma.pet.delete({
+            where: { id: pet.id },
         });
     }
 

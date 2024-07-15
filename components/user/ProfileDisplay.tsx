@@ -11,6 +11,7 @@ import {
 	deleteAccount, // Import deleteAccount function
 } from "@/app/api/user/actions";
 import DeleteProfileModal from "@/components/user/DeleteProfileModal"; // Assuming you have a DeleteProfileModal component
+import { usePathname, useSearchParams } from "next/navigation";
 
 interface ProfileUser extends User {
 	families: Family[];
@@ -25,13 +26,31 @@ const ProfileDisplay = () => {
 	const [isDeleteProfileModalOpen, setDeleteProfileModalOpen] = useState(false);
 	const [editingField, setEditingField] = useState("");
 	const [editedValue, setEditedValue] = useState("");
+	const [uId, setUId] = useState("");
+
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
 
 	// Fetch user data on session change or initial load
 	useEffect(() => {
-		if (session?.user.id) {
-			retrieveUser(session.user.id);
-		}
-	}, [session]);
+		// if (session?.user.id) {
+		// 	retrieveUser(session.user.id);
+		// }
+		// const { uid } = router.query;
+		// console.log("url: ", url, "router: ", uid);
+		extractUIDFromURL();
+		console.log;
+		retrieveUser(uId);
+	}, [uId]);
+
+	const extractUIDFromURL = () => {
+		const url = `${pathname}?${searchParams}`;
+		const queryString = url.split("?")[1];
+		if (!queryString) return null;
+
+		const params = new URLSearchParams(queryString);
+		setUId(params.get("uid") || "");
+	};
 
 	// Retrieve user data function
 	const retrieveUser = async (userId: string) => {
@@ -39,6 +58,7 @@ const ProfileDisplay = () => {
 			try {
 				const currentUserDocument = await getUserDocumentById(userId);
 				setUser(currentUserDocument as ProfileUser);
+				console.log(`Retrieve User: ${uId} ${user}`);
 			} catch (error) {
 				console.error("Error retrieving user:", error);
 			}
@@ -123,27 +143,31 @@ const ProfileDisplay = () => {
 							</li>
 						))}
 					</ul>
-					{/* Edit Name Button */}
-					<button
-						className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-						onClick={() => openModal("name", user?.name || "")}
-					>
-						Edit Name
-					</button>
-					{/* Edit Profile Photo Button */}
-					<button
-						className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ml-2"
-						onClick={() => openModal("image", user?.image || "")}
-					>
-						Edit Profile Photo
-					</button>
-					{/* Delete Account Button */}
-					<button
-						className="mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-red-500 ml-2"
-						onClick={() => setDeleteProfileModalOpen(true)}
-					>
-						Delete Account
-					</button>
+					{session?.user.id == uId && (
+						<div>
+							{/* Edit Name Button */}
+							<button
+								className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+								onClick={() => openModal("name", user?.name || "")}
+							>
+								Edit Name
+							</button>
+							{/* Edit Profile Photo Button */}
+							<button
+								className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ml-2"
+								onClick={() => openModal("image", user?.image || "")}
+							>
+								Edit Profile Photo
+							</button>
+							{/* Delete Account Button */}
+							<button
+								className="mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-red-500 ml-2"
+								onClick={() => setDeleteProfileModalOpen(true)}
+							>
+								Delete Account
+							</button>
+						</div>
+					)}
 				</div>
 			</div>
 

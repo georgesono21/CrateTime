@@ -23,6 +23,7 @@ import AddMemberModal from "./modals/AddMemberModal";
 import DeleteFamilyModal from "./modals/DeleteFamilyModal";
 import ViewInvitationsModal from "./modals/ViewInvitationsModal";
 import ChangeAdminModal from "./modals/ChangeAdminModal";
+import MiniUserProfileView from "@/components/user/MiniUserProfileView";
 
 // Modal Component
 
@@ -332,19 +333,17 @@ const FamilyList = () => {
 						<h2 className="text-xl font-semibold mb-2">{family.name}</h2>
 						<p className="text-sm mb-2">
 							Admin:{" "}
-							{familyMembers[family.id]?.find(
-								(member) => member.id === family.adminId
-							)
-								? `${
-										familyMembers[family.id].find(
-											(member) => member.id === family.adminId
-										)?.name
-								  } (${
-										familyMembers[family.id].find(
-											(member) => member.id === family.adminId
-										)?.email
-								  })`
-								: "Unknown"}
+							<MiniUserProfileView
+								user={
+									familyMembers[family.id]?.find(
+										(member) => member.id === family.adminId
+									)
+										? familyMembers[family.id].find(
+												(member) => member.id === family.adminId
+										  )
+										: undefined // Provide a default user object if admin is unknown
+								}
+							/>
 						</p>
 						<p className="text-sm mb-2">
 							Created At: {new Date(family.createdAt).toLocaleString()}
@@ -357,7 +356,8 @@ const FamilyList = () => {
 							{familyMembers[family.id]?.map((member) => (
 								<li key={member.id} className="flex gap-4">
 									<p>
-										{member.name} ({member.email})
+										{/* {member.name} ({member.email}) */}
+										<MiniUserProfileView user={member} />
 									</p>
 
 									{member.id === session?.user.id ? (
