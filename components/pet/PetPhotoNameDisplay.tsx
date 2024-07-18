@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Pet } from "@prisma/client";
 
 const PetPhotoNameDisplay = ({ pet }: { pet: Pet }) => {
-	console.log(pet);
+	// console.log(pet);
 	return (
 		<Link href={`/pets/${pet.id}`}>
 			<div className="flex items-center m-3">
@@ -15,8 +15,10 @@ const PetPhotoNameDisplay = ({ pet }: { pet: Pet }) => {
 					className="rounded-full w-12 h-12 mr-4"
 				/>
 				<div>
-					<p>{pet.name}</p>
-					<p>Date of Birth: {new Date(pet.dateOfBirth).toLocaleDateString()}</p>
+					<div>{pet.name}</div>
+					<div>
+						Date of Birth: {new Date(pet.dateOfBirth).toLocaleDateString()}
+					</div>
 				</div>
 			</div>
 		</Link>

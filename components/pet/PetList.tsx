@@ -9,6 +9,7 @@ import { createNewPet } from "@/app/api/pet/prismaActions";
 import RemovePetModal from "./modals/RemovePet";
 import PetPhotoNameDisplay from "./PetPhotoNameDisplay";
 import MiniUserProfileView from "../user/MiniUserProfileView";
+import React from "react";
 
 const PetList = () => {
 	const [families, setFamilies] = useState<Family[]>([]);
@@ -18,7 +19,7 @@ const PetList = () => {
 	const [familyPets, setFamilyPets] = useState<{ [key: string]: Pet[] }>({});
 	const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
 
-	const [selectePetId, setSelectedPetId] = useState<string | null>(null);
+	const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
 
 	const [newPet, setNewPet] = useState<Pet>({
 		id: "",
@@ -58,6 +59,17 @@ const PetList = () => {
 	const closeModal = () => {
 		setCreatePetModalOpen(false);
 		setRemovePetModalOpen(false);
+		setNewPet({
+			id: "",
+			name: "",
+			image: "",
+			dateOfBirth: new Date(),
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			familyId: "",
+			ignore: [],
+		} as Pet);
+		setSelectedFamilyId(null);
 	};
 
 	const fetchFamilies = async () => {
@@ -127,14 +139,15 @@ const PetList = () => {
 			familyId: "",
 			ignore: [],
 		} as Pet);
+
 		setSelectedFamilyId(null);
 	};
 
 	const handleRemovePet = async () => {
 		// Logic to create pet
-		console.log(
-			`newPet: ${JSON.stringify(newPet)} selectedFamilyId: ${selectedFamilyId}`
-		);
+		// console.log(
+		// 	`newPet: ${JSON.stringify(newPet)} selectedFamilyId: ${selectedFamilyId}`
+		// );
 
 		await deletePet(
 			session?.user.id || "",
@@ -165,7 +178,7 @@ const PetList = () => {
 						key={family.id}
 					>
 						<h2 className="text-xl font-semibold mb-2">{family.name}</h2>
-						<p className="text-sm mb-2">
+						<div className="text-sm mb-2">
 							Admin:{" "}
 							<MiniUserProfileView
 								user={
@@ -178,7 +191,7 @@ const PetList = () => {
 										: undefined // Provide a default user object if admin is unknown
 								}
 							/>
-						</p>
+						</div>
 						{/* <h3 className="font-semibold mb-2">Members:</h3>
 						<ul>
 							{familyMembers[family.id]?.map((member) => (
@@ -203,9 +216,9 @@ const PetList = () => {
 							{familyPets[family.id]?.map((pet) => (
 								<li key={pet.id} className="flex gap-4">
 									{/* <p>{JSON.stringify(pet)}</p> */}
-									<p>
+									<div>
 										<PetPhotoNameDisplay pet={pet} />
-									</p>
+									</div>
 
 									{family.adminId === session?.user.id && (
 										<div className="flex justify-center">

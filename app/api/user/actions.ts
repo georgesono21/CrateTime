@@ -5,6 +5,8 @@ import prisma from '@/app/libs/prismadb';
 import { ObjectId } from 'mongodb';
 
 
+
+
 export async function getUserIdFromEmail(email: string): Promise<string | null> {
     try {
         const user = await prisma.user.findUnique({

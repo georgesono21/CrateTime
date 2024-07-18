@@ -13,7 +13,6 @@ import { Family, Pet } from "@prisma/client";
   };
 
 export async function createNewPet(uId: string, familyId: string, petInfo: Pet) {
-    
 
     const family = await prisma.family.findUnique({
         where: { id: familyId }
@@ -47,6 +46,7 @@ export async function createNewPet(uId: string, familyId: string, petInfo: Pet) 
         data: {
             name: petInfo.name,
             familyId: petInfo.familyId,
+            image: petInfo.image,
             dateOfBirth: parseDate(petInfo.dateOfBirth)
         }
     });
@@ -65,6 +65,48 @@ export async function createNewPet(uId: string, familyId: string, petInfo: Pet) 
 
     return createdPet;
 }
+
+
+// export async function editPetPhoto(uId: string, familyId: string, imageUrl: string, petInfo: Pet) {
+    
+//     const pet = await prisma.pet.findUnique({
+//         where: {id: petInfo.id}
+//     });
+
+//     const family = await prisma.family.findUnique({
+//         where: { id: familyId }
+//     });
+
+//     const user = await prisma.user.findUnique({
+//         where: { id: uId }
+//     });
+
+//     if (!family) {
+//         throw new Error(`Family with id ${familyId} does not exist.`);
+//     }
+
+//     if (!user) {
+//         throw new Error(`User with id ${uId} does not exist`);
+//     }
+
+//     if (family.adminId !== user.id) {
+//         throw new Error(`User with id ${uId} is not authorized to create pet`);
+//     }
+
+    
+//     const createdPet = await prisma.pet.update({
+//         where: {id: petInfo.id},
+//         data: {
+//             image: imageUrl,
+
+//         }
+//     });
+
+
+//     // console.log(`Pet created: ${JSON.stringify(createdPet)}`);
+
+//     return createdPet;
+// }
 
 
 export async function editPet(uId: string, familyId: string, petInfo: Pet) {
@@ -93,6 +135,7 @@ export async function editPet(uId: string, familyId: string, petInfo: Pet) {
         throw new Error(`User with id ${uId} is not authorized to create pet`);
     }
 
+    console.log("edit pet: ", JSON.stringify(petInfo))
     
     
     const createdPet = await prisma.pet.update({

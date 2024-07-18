@@ -331,7 +331,7 @@ const FamilyList = () => {
 						// style={{ width: "500px" }}
 					>
 						<h2 className="text-xl font-semibold mb-2">{family.name}</h2>
-						<p className="text-sm mb-2">
+						<div className="text-sm mb-2">
 							Admin:{" "}
 							<MiniUserProfileView
 								user={
@@ -344,7 +344,7 @@ const FamilyList = () => {
 										: undefined // Provide a default user object if admin is unknown
 								}
 							/>
-						</p>
+						</div>
 						<p className="text-sm mb-2">
 							Created At: {new Date(family.createdAt).toLocaleString()}
 						</p>
@@ -355,10 +355,8 @@ const FamilyList = () => {
 						<ul>
 							{familyMembers[family.id]?.map((member) => (
 								<li key={member.id} className="flex gap-4">
-									<p>
-										{/* {member.name} ({member.email}) */}
-										<MiniUserProfileView user={member} />
-									</p>
+									{/* {member.name} ({member.email}) */}
+									<MiniUserProfileView user={member} />
 
 									{member.id === session?.user.id ? (
 										<button

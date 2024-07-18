@@ -1,6 +1,5 @@
 "use client";
 
-// Import necessary components and hooks
 import EditProfileModal from "@/components/user/EditProfileModal";
 import { signOut, useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
@@ -33,13 +32,7 @@ const ProfileDisplay = () => {
 
 	// Fetch user data on session change or initial load
 	useEffect(() => {
-		// if (session?.user.id) {
-		// 	retrieveUser(session.user.id);
-		// }
-		// const { uid } = router.query;
-		// console.log("url: ", url, "router: ", uid);
 		extractUIDFromURL();
-		console.log;
 		retrieveUser(uId);
 	}, [uId]);
 
@@ -68,11 +61,14 @@ const ProfileDisplay = () => {
 	// Function to handle saving edited field
 	const saveField = async (newValue: string) => {
 		if (user) {
+			console.log(`new value ${newValue}`);
+
 			try {
-				const updatedUser = await updateUserDocument(user.id, {
-					[editingField]: newValue,
-				});
-				// setUser(updatedUser as ProfileUser);
+				if (editingField == "name") {
+					const updatedUser = await updateUserDocument(user.id, {
+						[editingField]: newValue,
+					});
+				}
 				await retrieveUser(user.id);
 			} catch (error) {
 				console.error("Error updating user:", error);
@@ -86,8 +82,6 @@ const ProfileDisplay = () => {
 		if (user && user.id) {
 			try {
 				await deleteAccount(user.id);
-				// Perform any additional cleanup or logout if needed
-				// console.log("Account deleted successfully.");
 			} catch (error) {
 				console.error("Error deleting account:", error);
 			}
@@ -143,7 +137,7 @@ const ProfileDisplay = () => {
 							</li>
 						))}
 					</ul>
-					{session?.user.id == uId && (
+					{session?.user.id === uId && (
 						<div>
 							{/* Edit Name Button */}
 							<button
@@ -182,6 +176,7 @@ const ProfileDisplay = () => {
 					closeModals();
 				}}
 				onChange={handleInputChange}
+				user={user}
 			/>
 
 			{/* Delete Profile Modal */}
