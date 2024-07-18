@@ -25,9 +25,3 @@ export interface TasksForAPet {
 	name: string;
 	tasks: Task[];
 }
-
-export interface Pet {
-	id: string;
-	name: string;
-	pfpUrl: string;
-}

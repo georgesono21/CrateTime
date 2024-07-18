@@ -1,5 +1,5 @@
+import { Task } from "@prisma/client";
 import React from "react";
-import { Task } from "../models";
 
 const TasksForASinglePetDisplay = ({ tasks }: { tasks: Task[] }) => {
 	return (
@@ -12,14 +12,10 @@ const TasksForASinglePetDisplay = ({ tasks }: { tasks: Task[] }) => {
 						<strong>Deadline:</strong> {task.deadline.toString()}
 					</p>
 					<p>
-						<strong>Suggested Time Outside:</strong>{" "}
-						{task.suggestedMinTimeOutsideInMins} mins
-					</p>
-					<p>
 						<strong>Status:</strong> {task.status}
 					</p>
 					<p>
-						<strong>Assigned To:</strong> {task.assignedTo}
+						<strong>Assigned To:</strong> {task.userId}
 					</p>
 				</div>
 			))}

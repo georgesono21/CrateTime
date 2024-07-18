@@ -64,6 +64,7 @@ model Task {
   status    TaskStatus
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  deadline  DateTime
 
   pet    Pet    @relation(fields: [petId], references: [id])
   user   User   @relation(fields: [userId], references: [id])

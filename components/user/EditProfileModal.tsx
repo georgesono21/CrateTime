@@ -1,5 +1,5 @@
 import { updateUserDocument } from "@/app/api/user/actions";
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 
 interface EditProfileModalProps {
 	isOpen: boolean;
@@ -8,7 +8,7 @@ interface EditProfileModalProps {
 	editedValue: string;
 	onSave: () => void;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-	user: any;
+	setEditedValue: any;
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({
@@ -18,10 +18,17 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 	editedValue,
 	onSave,
 	onChange,
-	user,
+	setEditedValue,
 }) => {
 	const [file, setFile] = useState<File | null>(null);
 	const [uploading, setUploading] = useState(false);
+
+	useEffect(() => {
+		if (editingField == "image") {
+			setFile(null);
+			onSave();
+		}
+	}, [editedValue]);
 
 	if (!isOpen) return null;
 
@@ -47,11 +54,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
 			const data = await response.json();
 
-			console.log(`handleSubmit: ${data.s3Url}`);
-
-			const updatedUser = await updateUserDocument(user.id, {
-				["image"]: data.s3Url,
-			});
+			const newEditedValue = data.s3Url;
+			// const newEditedValue = editedValue + "bruh";
+			await setEditedValue(newEditedValue);
 
 			setUploading(false);
 		} catch (error) {
@@ -95,10 +100,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 						className="bg-green-500 text-white px-4 py-2 rounded mt-5"
 						type="submit"
 						disabled={!file || uploading}
-						onClick={async (e) => {
-							await handleSubmit();
-							onSave();
-							onClose();
+						onClick={() => {
+							handleSubmit();
 						}}
 					>
 						{uploading ? "Uploading..." : "Upload"}

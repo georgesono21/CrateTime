@@ -45,10 +45,11 @@ const CreatePetModal = ({
 
 				const pet = newPet;
 				pet.image = data.s3Url;
-				await setNewPet(pet);
+				setNewPet(pet);
 				setUploading(false);
 				await onConfirm();
 				onClose();
+				setFile(null);
 			} catch (error) {
 				console.error("Error uploading file:", error);
 				setUploading(false);
@@ -68,7 +69,13 @@ const CreatePetModal = ({
 	};
 
 	return (
-		<Modal isOpen={isOpen} onClose={onClose}>
+		<Modal
+			isOpen={isOpen}
+			onClose={() => {
+				setFile(null);
+				onClose();
+			}}
+		>
 			<h2 className="text-xl font-bold mb-4">
 				{newPet?.id ? "Edit Pet" : "Create New Pet"}
 			</h2>

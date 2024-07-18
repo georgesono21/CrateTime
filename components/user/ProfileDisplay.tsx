@@ -64,11 +64,11 @@ const ProfileDisplay = () => {
 			console.log(`new value ${newValue}`);
 
 			try {
-				if (editingField == "name") {
-					const updatedUser = await updateUserDocument(user.id, {
-						[editingField]: newValue,
-					});
-				}
+				// if (editingField == "name") {
+				const updatedUser = await updateUserDocument(user.id, {
+					[editingField]: newValue,
+				});
+				// }
 				await retrieveUser(user.id);
 			} catch (error) {
 				console.error("Error updating user:", error);
@@ -177,6 +177,7 @@ const ProfileDisplay = () => {
 				}}
 				onChange={handleInputChange}
 				user={user}
+				setEditedValue={setEditedValue}
 			/>
 
 			{/* Delete Profile Modal */}
