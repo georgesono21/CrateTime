@@ -3,6 +3,7 @@
 import { PetCrateTime, TasksForAPet } from "@/components/models";
 import CrateTime from "@/components/pet/CrateTimeDisplay";
 import TaskDisplay from "@/components/tasks/TaskDisplay";
+import FamilyTaskDisplay from "@/components/tasks/FamilyTaskDisplay";
 
 import { crateTimeToday, petTasks } from "@/mockData";
 import { getServerSession } from "next-auth";
@@ -29,14 +30,16 @@ export default function Home() {
 			{/* <button className="border" onClick={async () => await test()}>
 				db test
 			</button> */}
-			<div className="mb-10">
+			{/* <div className="mb-10">
 				<h1 className="text-3xl mb-5 font-bold text-center">Pet CrateTime</h1>
 				<CrateTime pets={crateTimeToday as PetCrateTime[]} />
 			</div>
 			<div>
 				<h1 className="text-3xl mb-5 font-bold text-center">Task Overview</h1>
 				<TaskDisplay petTasks={petTasks as TasksForAPet[]} />
-			</div>
+			</div> */}
+
+			<FamilyTaskDisplay />
 		</div>
 	);
 }

@@ -4,6 +4,7 @@ import { TasksForAPet } from "../models";
 import CreateTaskModal from "./modals/CreateTaskModal";
 import { Task, User } from "@prisma/client";
 import { useSession } from "next-auth/react";
+import PetPhotoNameDisplay from "@components/pets/PetPhotoNameDisplay";
 
 const TaskDisplay = ({
 	petTasks,
@@ -81,7 +82,7 @@ const TaskDisplay = ({
 				onConfirm={handleCreate}
 				setNewTask={setNewTask}
 				newTask={newTask}
-				users={[]}
+				familyId={familyId}
 			/>
 		</div>
 	);
