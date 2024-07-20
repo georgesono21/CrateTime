@@ -11,7 +11,7 @@ import { Family, Task } from "@prisma/client";
     }
   };
 
-export async function createTask(petId: string, familyId:string, userId:string, taskInfo: Task){
+export async function createTask(petId: string, familyId:string, userId:string, creatorId:string, taskInfo: Task){
 
 
     const family = await prisma.family.findUnique({
@@ -20,6 +20,10 @@ export async function createTask(petId: string, familyId:string, userId:string, 
 
     const user = await prisma.user.findUnique({
         where: { id: userId }
+    });
+
+    const creator =  await prisma.user.findUnique({
+        where: { id: creatorId }
     });
 
 
@@ -40,10 +44,7 @@ export async function createTask(petId: string, familyId:string, userId:string, 
         throw new Error(`Pet with id ${userId} does not exist`);
     }
 
-    taskInfo.familyId = familyId
-    taskInfo.userId = userId
-    taskInfo.petId = petId
-
+  
     const createdTask = await prisma.task.create({
         data: {
             title: taskInfo.title,
@@ -51,18 +52,24 @@ export async function createTask(petId: string, familyId:string, userId:string, 
             petId: taskInfo.petId,
             userId: taskInfo.userId,
             familyId: taskInfo.familyId,
-            status: "OPEN"    
+            status: "OPEN",
+            creatorId: taskInfo.creatorId,
+            deadline: parseDate(taskInfo.deadline)
         }
     });
 
-    await prisma.family.update({
-        where: { id: familyId },
+    await prisma.pet.update({
+        where: { id: petId },
         data: {
-            task: {
+            tasks: {
                 connect: { id: createdTask.id}
             }
         }
     });
+
+
+
+
 
     
 
@@ -110,6 +117,5 @@ export async function retrieveFamilyMembers(familyId: string) {
         throw new Error(`Family with id ${familyId} not found.`);
     }
     
-    // console.log(family.familyMembers)
     return family.familyMembers;
 }

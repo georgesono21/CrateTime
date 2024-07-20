@@ -49,7 +49,7 @@ export async function createNewPet(uId: string, familyId: string, petInfo: Pet) 
             image: petInfo.image,
             dateOfBirth: parseDate(petInfo.dateOfBirth)
         }
-    });
+    });-
 
     // Connect the newly created pet to the family
     await prisma.family.update({

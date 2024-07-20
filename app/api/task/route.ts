@@ -36,7 +36,25 @@ export async function GET(req: NextRequest) {
               from: 'Task',
               localField: '_id',
               foreignField: 'petId',
-              as: 'tasks'
+              as: 'tasks',
+              pipeline: [
+                {
+                  $lookup: {
+                    from: 'User',
+                    localField: 'creatorId',
+                    foreignField: '_id',
+                    as: 'creator'
+                  }
+                },
+                {
+                  $lookup: {
+                    from: 'User',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'user'
+                  }
+                },
+              ]
             }
           }
         ]

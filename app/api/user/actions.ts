@@ -59,6 +59,37 @@ export async function getUserDocumentById(userId: string) {
     }
 }
 
+
+export async function userIdToUsername(userId: string) {
+
+    if (userId == "") {
+        return null
+    }
+    try {
+        
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId,
+            },
+            include: {
+                families: true, // Assuming 'familyIds' is the field in your user model
+                // Expand other related fields if necessary
+            },
+        });
+
+        if (!user) {
+            throw new Error(`User with ID ${userId} not found.`);
+        }
+
+        // console.log("user: ", user)
+
+        return user.name;
+    } catch (error) {
+        console.error(`Error fetching user document by ID ${userId}:`, error);
+        throw new Error(`Failed to fetch user document by ID ${userId}: ${error.message}`);
+    }
+}
+
 export async function updateUserDocument(userId: string, data: { name?: string; image?: string }) {
     if (userId === "") {
         return null;

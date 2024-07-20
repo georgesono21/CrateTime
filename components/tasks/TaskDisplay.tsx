@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
-import TasksForASinglePetDisplay from "./TaskForASinglePet";
-import { TasksForAPet } from "../models";
-import CreateTaskModal from "./modals/CreateTaskModal";
 import { Task, User } from "@prisma/client";
 import { useSession } from "next-auth/react";
-import PetPhotoNameDisplay from "@components/pets/PetPhotoNameDisplay";
+import CreateTaskModal from "./modals/CreateTaskModal";
+import { createTask } from "@/app/api/task/prismaActions";
+import PetPhotoNameDisplay from "../pet/PetPhotoNameDisplay";
+import PetPhotoNameDisplayMongo from "../pet/PetPhotoNameDisplayMongo";
+import TasksForASinglePetDisplay from "./TaskForASinglePet";
 
 const TaskDisplay = ({
 	petTasks,
 	familyId,
+	familyMembers,
 }: {
-	petTasks: TasksForAPet[];
+	petTasks: any[];
 	familyId: string;
+	familyMembers: { [key: string]: User[] };
 }) => {
 	const { data: session } = useSession();
-
 	const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
 	const [newTask, setNewTask] = useState<Task>({
 		id: "",
@@ -26,19 +28,43 @@ const TaskDisplay = ({
 		familyId: "",
 		userId: "",
 		petId: "",
+		creatorId: "",
 		status: "COMPLETED",
+		ignore: [],
 	});
 	const [uId, setUId] = useState("");
-	const [currentUserId, setCurrentUserId] = useState("");
-	const [allTasks, setAllTasks] = useState<Task[]>([]);
-
-	const handleCreate = () => {
-		return;
-	};
 
 	useEffect(() => {
 		setUId(session?.user.id || "");
 	}, [session]);
+
+	const handleCreate = () => {
+		console.log(`handleCreate ${JSON.stringify(newTask)}`);
+
+		createTask(
+			newTask.petId,
+			newTask.familyId,
+			newTask.userId,
+			newTask.creatorId,
+			newTask
+		);
+
+		setNewTask({
+			id: "",
+			title: "",
+			desc: "",
+			deadline: new Date(),
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			familyId: "",
+			userId: "",
+			petId: "",
+			creatorId: "",
+			status: "COMPLETED",
+			ignore: [],
+		});
+		return;
+	};
 
 	const closeModal = () => {
 		setCreateTaskModalOpen(false);
@@ -53,42 +79,62 @@ const TaskDisplay = ({
 			userId: "",
 			petId: "",
 			status: "COMPLETED",
+			creatorId: "",
+			ignore: [],
 		});
 	};
 
 	return (
 		<div className="flex flex-col space-y-4">
 			{petTasks.map((pet, index) => (
-				<div key={index} className="border">
-					<div className="flex justify-between  m-4">
-						<h1 className="text-3xl pb-3">{pet.name}</h1>
+				<div key={index} className=" p-4 rounded-lg shadow-md">
+					<div className="flex items-center mb-4">
+						<h1 className="text-xl">
+							<PetPhotoNameDisplayMongo pet={pet} />
+						</h1>
 						<button
-							className=" ml-5 btn btn-primary dark:text-white"
+							className="btn ml-10 btn-primary dark:text-white"
 							onClick={() => {
 								setCreateTaskModalOpen(true);
+
+								let newNewTask = {
+									...newTask,
+									petId: pet._id,
+									familyId: familyId,
+									creatorId: uId,
+								};
+								setNewTask(newNewTask);
 							}}
 						>
-							{" "}
 							Create new task
 						</button>
+						<button className="btn ml-10 btn-secondary dark:text-white">
+							View Past Tasks
+						</button>
 					</div>
-
-					{/* <TasksForASinglePetDisplay tasks={pet.tasks as Task[]} /> */}
+					<div>
+						{pet.tasks.length > 0 ? (
+							<TasksForASinglePetDisplay tasks={pet.tasks} />
+						) : (
+							<p>No tasks available for this pet.</p>
+						)}
+					</div>
 				</div>
 			))}
 			<CreateTaskModal
 				isOpen={createTaskModalOpen}
 				onClose={closeModal}
-				onConfirm={handleCreate}
+				onConfirm={() => {
+					handleCreate();
+					closeModal();
+				}}
 				setNewTask={setNewTask}
 				newTask={newTask}
 				familyId={familyId}
+				familyMembers={familyMembers}
 			/>
 		</div>
 	);
 };
 
 export default TaskDisplay;
-function extractUIDFromURL() {
-	throw new Error("Function not implemented.");
-}

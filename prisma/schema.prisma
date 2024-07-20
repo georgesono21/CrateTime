@@ -38,6 +38,9 @@ model Pet {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  taskIds String[] @default([]) @db.ObjectId
+  tasks   Task[]   @relation("tasks", fields: [taskIds], references: [id])
+
   familyId String @db.ObjectId
   Task     Task[]
 
@@ -65,6 +68,10 @@ model Task {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   deadline  DateTime
+  creatorId String     @db.ObjectId
+
+  ignore String[] @default([]) @db.ObjectId
+  pets   Pet[]    @relation("tasks", fields: [ignore], references: [id])
 
   pet    Pet    @relation(fields: [petId], references: [id])
   user   User   @relation(fields: [userId], references: [id])

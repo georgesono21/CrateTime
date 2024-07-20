@@ -2,7 +2,7 @@ import { User } from "@prisma/client";
 import React from "react";
 import Link from "next/link";
 
-const MiniUserProfileView = ({ user }: { user: User | undefined }) => {
+const MiniUserProfileView = ({ user }: { user: any | undefined }) => {
 	return (
 		<Link href={`/home/profile?uid=${user?.id}`}>
 			<div className="flex items-center m-3">
