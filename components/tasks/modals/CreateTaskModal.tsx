@@ -30,10 +30,23 @@ const CreateTaskModal = ({
 	}, [familyMembers]);
 
 	const handleChange = (
-		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+		e: React.ChangeEvent<
+			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+		>
 	) => {
-		const { name, value } = e.target;
-		setNewTask((prev: Task) => ({ ...prev, [name]: value }));
+		const { name, value, type } = e.target;
+		if (type === "checkbox") {
+			const checked = (e.target as HTMLInputElement).checked;
+			setNewTask((prev: Task) => ({
+				...prev,
+				[name]: checked,
+			}));
+		} else {
+			setNewTask((prev: Task) => ({
+				...prev,
+				[name]: value,
+			}));
+		}
 	};
 
 	const formatDate = (date: string | Date): string => {
@@ -115,7 +128,7 @@ const CreateTaskModal = ({
 				name="userId"
 				value={newTask.userId || ""}
 				onChange={handleChange}
-				className="border p-2 mb-4 w-full"
+				className="border p-2   mb-4 w-full"
 			>
 				<option value="">Select Assignee</option>
 				{familyMembers[familyId] &&
@@ -128,6 +141,19 @@ const CreateTaskModal = ({
 			{!isAssigneeSelected && (
 				<p className="text-red-500">Please select an assignee.</p>
 			)}
+			<div>
+				<div className="flex items-center ">
+					<h1 className="mr-5 text-center">Provide Proof?</h1>
+					<input
+						type="checkbox"
+						name="provideProof"
+						checked={newTask.provideProof || false}
+						onChange={handleChange}
+						className="border "
+					/>
+				</div>
+				<p className="text-xs mb-4">(assignee uploads a photo of completion)</p>
+			</div>
 
 			<button
 				className="bg-green-500 text-white px-4 py-2 rounded"

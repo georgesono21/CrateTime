@@ -1,13 +1,29 @@
 import mongoClient, { connectMongoClient } from '@/app/libs/mongodb';
 import { NextRequest, NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   await connectMongoClient();
 
   const database = mongoClient.db('dev');
   const familyCollection = database.collection('Family');
 
+  let userId;
+  try {
+    const body = await req.json();
+    userId = body.userId;
+  } catch (error) {
+    return NextResponse.json({ error: 'Invalid request body', details: error.message });
+  }
+
+  const userObjectId = new ObjectId(userId);
+
   const aggregationPipeline = [
+    {
+      $match: {
+        membersIds: userObjectId
+      }
+    },
     {
       $lookup: {
         from: 'User',
@@ -53,7 +69,7 @@ export async function GET(req: NextRequest) {
                     foreignField: '_id',
                     as: 'user'
                   }
-                },
+                }
               ]
             }
           }

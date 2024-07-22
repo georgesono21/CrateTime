@@ -28,9 +28,11 @@ const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 						<MiniUserProfileView user={task.creator[0]} />
 					</p>
 					<div className="flex gap-5">
-						<button className="btn  dark:text-white dark:bg-blue-600 dark:hover:bg-blue-700">
-							Start Task!
-						</button>
+						{task.status == "OPEN" ? (
+							<button className="btn  dark:text-white dark:bg-blue-600 dark:hover:bg-blue-700">
+								Start Task
+							</button>
+						) : null}
 						<button className="btn  dark:text-white dark:bg-blue-500 dark:hover:bg-blue-600">
 							Edit Task
 						</button>

@@ -54,7 +54,8 @@ export async function createTask(petId: string, familyId:string, userId:string, 
             familyId: taskInfo.familyId,
             status: "OPEN",
             creatorId: taskInfo.creatorId,
-            deadline: parseDate(taskInfo.deadline)
+            deadline: parseDate(taskInfo.deadline),
+            provideProof: taskInfo.provideProof
         }
     });
 

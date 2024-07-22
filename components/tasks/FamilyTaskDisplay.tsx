@@ -31,7 +31,14 @@ const FamilyTaskDisplay = () => {
 	const fetchFamilies = async () => {
 		if (session?.user?.id) {
 			try {
-				const response = await fetch("/api/task");
+				const response = await fetch("/api/task", {
+					method: "POST", // Use POST method
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ userId: session.user.id }), // Include user ID in the body
+				});
+
 				const fetchedFamilies = await response.json();
 
 				setFamilies(fetchedFamilies);

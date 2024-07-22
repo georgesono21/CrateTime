@@ -6,6 +6,7 @@ import { createTask } from "@/app/api/task/prismaActions";
 import PetPhotoNameDisplay from "../pet/PetPhotoNameDisplay";
 import PetPhotoNameDisplayMongo from "../pet/PetPhotoNameDisplayMongo";
 import TasksForASinglePetDisplay from "./TaskForASinglePet";
+import ViewPastTaskModal from "./modals/ViewPastTaskModal";
 
 const TaskDisplay = ({
 	petTasks,
@@ -18,6 +19,8 @@ const TaskDisplay = ({
 }) => {
 	const { data: session } = useSession();
 	const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
+	const [viewPastTaskModalOpen, setViewPastTaskModalOpen] = useState(false);
+	const [selectedPetTasks, setSelectedPetTasks] = useState<Task[]>([]);
 	const [newTask, setNewTask] = useState<Task>({
 		id: "",
 		title: "",
@@ -31,12 +34,18 @@ const TaskDisplay = ({
 		creatorId: "",
 		status: "COMPLETED",
 		ignore: [],
+		provideProof: false,
+		image: "",
 	});
 	const [uId, setUId] = useState("");
 
 	useEffect(() => {
 		setUId(session?.user.id || "");
 	}, [session]);
+
+	// useEffect(() => {
+	// 	console.log(`selectedPetTasks ${selectedPetTasks}`);
+	// }, [selectedPetTasks]);
 
 	const handleCreate = () => {
 		console.log(`handleCreate ${JSON.stringify(newTask)}`);
@@ -62,12 +71,15 @@ const TaskDisplay = ({
 			creatorId: "",
 			status: "COMPLETED",
 			ignore: [],
+			provideProof: false,
+			image: "",
 		});
 		return;
 	};
 
 	const closeModal = () => {
 		setCreateTaskModalOpen(false);
+		setViewPastTaskModalOpen(false);
 		setNewTask({
 			id: "",
 			title: "",
@@ -81,6 +93,8 @@ const TaskDisplay = ({
 			status: "COMPLETED",
 			creatorId: "",
 			ignore: [],
+			provideProof: false,
+			image: "",
 		});
 	};
 
@@ -108,7 +122,13 @@ const TaskDisplay = ({
 						>
 							Create new task
 						</button>
-						<button className="btn ml-10 btn-secondary dark:text-white">
+						<button
+							className="btn ml-10 btn-secondary dark:text-white"
+							onClick={() => {
+								setSelectedPetTasks(pet.tasks);
+								setViewPastTaskModalOpen(true);
+							}}
+						>
 							View Past Tasks
 						</button>
 					</div>
@@ -132,6 +152,14 @@ const TaskDisplay = ({
 				newTask={newTask}
 				familyId={familyId}
 				familyMembers={familyMembers}
+			/>
+			<ViewPastTaskModal
+				isOpen={viewPastTaskModalOpen}
+				onClose={closeModal}
+				// pastTasks={selectedPetTasks.filter((task) => {
+				// 	task.status == "COMPLETED" || task.status == "CANCELLED";
+				// })}
+				pastTasks={selectedPetTasks}
 			/>
 		</div>
 	);
