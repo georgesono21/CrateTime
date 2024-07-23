@@ -21,7 +21,7 @@ export async function getUserIdFromEmail(email: string): Promise<string | null> 
         return user?.id || null; // Return userId if found, otherwise null
     } catch (error) {
         console.error(`Error fetching user by email ${email}:`, error);
-        throw new Error(`Failed to fetch user by email ${email}: ${error.message}`);
+        throw new Error(`Failed to fetch user by email ${email}`);
     }
 }
 
@@ -55,7 +55,7 @@ export async function getUserDocumentById(userId: string) {
         return user;
     } catch (error) {
         console.error(`Error fetching user document by ID ${userId}:`, error);
-        throw new Error(`Failed to fetch user document by ID ${userId}: ${error.message}`);
+        throw new Error(`Failed to fetch user document by ID ${userId}: `);
     }
 }
 
@@ -86,7 +86,7 @@ export async function userIdToUsername(userId: string) {
         return user.name;
     } catch (error) {
         console.error(`Error fetching user document by ID ${userId}:`, error);
-        throw new Error(`Failed to fetch user document by ID ${userId}: ${error.message}`);
+        throw new Error(`Failed to fetch user document by ID ${userId}:`);
     }
 }
 
@@ -109,7 +109,7 @@ export async function updateUserDocument(userId: string, data: { name?: string; 
         return updatedUser;
     } catch (error) {
         console.error(`Error updating user document by ID ${userId}:`, error);
-        throw new Error(`Failed to update user document by ID ${userId}: ${error.message}`);
+        throw new Error(`Failed to update user document by ID ${userId}: `);
     }
 }
 
@@ -194,6 +194,6 @@ try {
             return deletedUser;
     } catch (error) {
         console.error(`Error deleting user with ID ${userId}:`, error);
-        throw new Error(`Failed to delete user with ID ${userId}: ${error.message}`);
+        throw new Error(`Failed to delete user with ID ${userId}:`);
     }
 }

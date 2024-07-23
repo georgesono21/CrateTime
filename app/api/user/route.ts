@@ -42,6 +42,6 @@ export async function GET(req: NextRequest) {
     const usersWithFamiliesPetsAndTasks = await userCollection.aggregate(aggregationPipeline).toArray();
     return NextResponse.json(usersWithFamiliesPetsAndTasks);
   } catch (error) {
-    return NextResponse.json({ error: 'Error fetching data', details: error.message });
+    return NextResponse.json({ error: 'Error fetching data' });
   }
 }

@@ -13,15 +13,7 @@ const isPhotoRequired = (provideProof: Boolean) => {
 	return provideProof ? "Yes" : "No";
 };
 
-const TasksForASinglePetDisplay = ({
-	tasks,
-	familyId,
-	familyMembers,
-}: {
-	tasks: any[];
-	familyId: string;
-	familyMembers: { [key: string]: User[] };
-}) => {
+const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 	const [completeTaskModalOpen, setCompleteTaskModalOpen] = useState(false);
 	const [editTaskModalOpen, setEditTaskModalOpen] = useState(false);
 	const [selectedTask, setSelectedTask] = useState<any>({

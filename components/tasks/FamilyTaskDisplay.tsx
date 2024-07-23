@@ -1,11 +1,25 @@
 import { Family, Pet, User } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-
 import TaskDisplay from "./TaskDisplay";
 
+// Define types for MongoDB family data
+interface MongoFamily {
+	_id: string;
+	name: string;
+	image: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	adminId: string;
+	membersIds: string[];
+	petIds: string[];
+	invitationToUserIds: string[];
+	pets: Pet[]; // Assuming this is an array of Pet objects
+	familyMembers: User[]; // Assuming this is an array of User objects
+}
+
 const FamilyTaskDisplay = () => {
-	const [families, setFamilies] = useState<Family[]>([]);
+	const [families, setFamilies] = useState<MongoFamily[]>([]);
 	const [familyMembers, setFamilyMembers] = useState<{ [key: string]: User[] }>(
 		{}
 	);
@@ -13,28 +27,13 @@ const FamilyTaskDisplay = () => {
 
 	const { data: session } = useSession();
 
-	// useEffect(() => {
-	// 	console.log(
-	// 		`familyTaskDisplay familyMembers ${JSON.stringify(familyMembers)}`
-	// 	);
-	// }, [familyMembers]);
-
-	// useEffect(() => {
-	// 	console.log(`familyTaskDisplay familyPets ${JSON.stringify(familyPets)}`);
-	// }, [familyPets]);
-
-	// useEffect(() => {
-	// 	console.log(`familyTaskDisplay families ${JSON.stringify(familyPets)}`);
-	// }, [families]);
-
 	useEffect(() => {
 		const eventSource = new EventSource(`/api/task`);
-		eventSource.onopen = (e) => {
+		eventSource.onopen = () => {
 			console.log("task server open ready");
 		};
-		eventSource.onmessage = async (e) => {
+		eventSource.onmessage = async () => {
 			console.log("onmessage");
-			// console.log(`session fetch ${JSON.stringify(session)}`);
 			await fetchData();
 		};
 
@@ -49,26 +48,25 @@ const FamilyTaskDisplay = () => {
 	};
 
 	const fetchFamilies = async () => {
-		// console.log(`session fetch ${JSON.stringify(session)}`);
 		if (session?.user?.id) {
 			try {
 				const response = await fetch("/api/task", {
 					cache: "no-store",
-					method: "POST", // Use POST method
+					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
 					},
-					body: JSON.stringify({ userId: session.user.id }), // Include user ID in the body
+					body: JSON.stringify({ userId: session.user.id }),
 				});
 
-				const fetchedFamilies = await response.json();
+				const fetchedFamilies: MongoFamily[] = await response.json();
 
 				setFamilies(fetchedFamilies);
 
-				const members = {};
-				const pets = {};
+				const members: { [key: string]: User[] } = {};
+				const pets: { [key: string]: Pet[] } = {};
 
-				fetchedFamilies.forEach((family: any) => {
+				fetchedFamilies.forEach((family) => {
 					members[family._id] = family.familyMembers;
 					pets[family._id] = family.pets;
 				});
@@ -85,13 +83,13 @@ const FamilyTaskDisplay = () => {
 
 	useEffect(() => {
 		fetchData();
-	}, [session?.user.id]);
+	}, [session?.user?.id]);
 
 	return (
 		<div className="m-8 flex-col justify-center">
 			<div className="flex-wrap gap-3">
-				{families.length == 0 ? <h1>No Families Yet...</h1> : null}
-				{families.map((family: any) => (
+				{families.length === 0 ? <h1>No Families Yet...</h1> : null}
+				{families.map((family) => (
 					<div
 						className="border border-color p-4 mb-4 rounded-lg shadow-sm"
 						key={family._id}

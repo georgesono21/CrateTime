@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     userId = body.userId;
   } catch (error) {
-    return NextResponse.json({ error: 'Invalid request body', details: error.message });
+    return NextResponse.json({ error: 'Invalid request body'});
   }
 
   const userObjectId = new ObjectId(userId);
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     const familiesWithMembersPetsAndTasks = await familyCollection.aggregate(aggregationPipeline).toArray();
     return NextResponse.json(familiesWithMembersPetsAndTasks);
   } catch (error) {
-    return NextResponse.json({ error: 'Error fetching data', details: error.message });
+    return NextResponse.json({ error: 'Error fetching data' });
   }
 }
 

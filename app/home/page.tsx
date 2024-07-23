@@ -1,18 +1,6 @@
 "use client";
 
-import { PetCrateTime, TasksForAPet } from "@/components/models";
-import CrateTime from "@/components/pet/CrateTimeDisplay";
-import TaskDisplay from "@/components/tasks/TaskDisplay";
 import FamilyTaskDisplay from "@/components/tasks/FamilyTaskDisplay";
-
-import { crateTimeToday, petTasks } from "@/mockData";
-import { getServerSession } from "next-auth";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
-import Link from "next/link";
-import prisma from "../libs/prismadb";
-import { createNewFamily } from "../api/family/prismaActions";
-// import { createNewFamily } from "../libs/dbFuncs";
 
 export default function Home() {
 	// const session = useSession();
