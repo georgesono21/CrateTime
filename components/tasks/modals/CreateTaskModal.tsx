@@ -23,11 +23,11 @@ const CreateTaskModal = ({
 	const [isValidDeadline, setIsValidDeadline] = useState(true);
 	const [isTitleValid, setIsTitleValid] = useState(true);
 
-	useEffect(() => {
-		console.log(
-			`createtaskmodal familyMembers ${JSON.stringify(familyMembers)}`
-		);
-	}, [familyMembers]);
+	// useEffect(() => {
+	// 	console.log(
+	// 		`createtaskmodal familyMembers ${JSON.stringify(familyMembers)}`
+	// 	);
+	// }, [familyMembers]);
 
 	const handleChange = (
 		e: React.ChangeEvent<

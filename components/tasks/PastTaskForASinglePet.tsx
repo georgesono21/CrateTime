@@ -1,14 +1,20 @@
 import { Task } from "@prisma/client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MiniUserProfileView from "../user/MiniUserProfileView";
 import { deleteTask, updateTaskStatus } from "@/app/api/task/prismaActions";
 
-const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
+const PastTaskForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 	const [cancelTaskModalOpen, setCancelTaskModalOpen] = useState(false);
+	const [optimisticTasks, setOptimisticTasks] = useState<any[]>(tasks);
+
+	useEffect(() => {
+		// console.log(PastTasksForASinglePetDisplay);
+		setOptimisticTasks(tasks);
+	}, [tasks]);
 
 	return (
 		<div className="flex flex-col space-y-4">
-			{tasks.map((task, index) => (
+			{optimisticTasks.map((task, index) => (
 				<div
 					key={index}
 					className="p-4 rounded shadow-md border mb-4 dark:bg-gray-800 dark:border-gray-700"
@@ -50,6 +56,11 @@ const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 								<button
 									className="btn  dark:text-white dark:bg-blue-600 dark:hover:bg-blue-700"
 									onClick={() => {
+										const newOptimisticTasks = optimisticTasks.filter((t) => {
+											return t._id !== task._id;
+										});
+
+										setOptimisticTasks(newOptimisticTasks);
 										updateTaskStatus(task, "OPEN");
 									}}
 								>
@@ -58,6 +69,11 @@ const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 								<button
 									className="btn  dark:text-white dark:bg-red-600 dark:hover:bg-red-700"
 									onClick={() => {
+										const newOptimisticTasks = optimisticTasks.filter((t) => {
+											return t._id !== task._id;
+										});
+
+										setOptimisticTasks(newOptimisticTasks);
 										deleteTask(task);
 									}}
 								>
@@ -132,4 +148,4 @@ const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 	);
 };
 
-export default TasksForASinglePetDisplay;
+export default PastTaskForASinglePetDisplay;

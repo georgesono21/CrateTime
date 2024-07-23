@@ -1,7 +1,7 @@
 'use server';
 
 import prisma from "@/app/libs/prismadb";
-import { Family, Task } from "@prisma/client";
+import { Family, Task, TaskStatus } from "@prisma/client";
 
  const parseDate = (date: string | Date): Date => {
     if (typeof date === "string") {
@@ -10,6 +10,80 @@ import { Family, Task } from "@prisma/client";
       return date;
     }
   };
+
+
+export async function deleteTask(taskToDelete: any){
+
+    // console.log(`deleteTask ${JSON.stringify(taskToDelete)}`)
+
+    // return
+
+
+    console.log(`task to delete id ${taskToDelete._id}`)
+    const task = await prisma.task.findUnique({
+        where: { id: taskToDelete._id },
+    });
+
+    // console.log(task)
+    // return
+
+    if (!task) {
+        throw new Error(`Task with id ${taskToDelete._id} not found.`);
+    }
+    
+    if (task.petId != taskToDelete.petId) {
+         throw new Error(`Pet ids are not the same for that task id`);
+    }
+    
+    const pet = await prisma.pet.findUnique({
+        where: {id: task.petId}
+    })
+
+    if (!pet){
+         throw new Error(`Pet with id ${task.petId} not found.`);
+    }
+
+    
+    await prisma.pet.update({
+        where: { id: taskToDelete.petId},
+        data: {
+            taskIds: {
+                set: pet.taskIds.filter((id) => id !== taskToDelete._id),
+            },
+        },
+    });
+
+    await prisma.task.delete({
+        where: { id: taskToDelete._id },
+    });
+
+
+}
+
+export async function updateTaskStatus(task: any, status: TaskStatus){
+    console.log(`cancelTask ${JSON.stringify(task)}`)
+
+    const selectedTask = await prisma.task.findUnique({
+        where: {id: task._id}
+    })
+
+    if (!selectedTask){
+          throw new Error(`Family with id ${task._id} does not exist.`);
+    } 
+
+    await prisma.task.update({
+        where: {id: task._id},
+        data: {
+            status: {
+                set: status
+            }
+        }
+    })
+
+}
+
+
+
 
 export async function createTask(petId: string, familyId:string, userId:string, creatorId:string, taskInfo: Task){
 
@@ -70,53 +144,5 @@ export async function createTask(petId: string, familyId:string, userId:string, 
 
 
 
-
-
-    
-
-
-    
-
 }
 
-export async function retrieveUserFamilies(uId: string) {
-
-    // retrieveUserFamiliesMongo(uId);
-    const user = await prisma.user.findUnique({
-      where: { id: uId },
-      include: { families: true },
-    });
-
-    if (!user) {
-      throw new Error(`User with id ${uId} does not exist`);
-    }
-
-    const families = await Promise.all(user.families.map(async (family) => {
-      const fullFamily = await prisma.family.findUnique({
-        where: { id: family.id },
-        include: { familyMembers: true, admin: true },
-      });
-
-      return fullFamily;
-    }));
-
-    if (!families) {
-      throw new Error(`User does not have a families array in user document or user DNE`);
-    }
-
-    // console.log(`retrieveUserFamily: uId: ${uId}: families: ${JSON.stringify(families, null, 2)}`);
-    return families as Family[];
-}
-
-export async function retrieveFamilyMembers(familyId: string) {
-    const family = await prisma.family.findUnique({
-        where: { id: familyId },
-        include: { familyMembers: true },
-    });
-
-    if (!family) {
-        throw new Error(`Family with id ${familyId} not found.`);
-    }
-    
-    return family.familyMembers;
-}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Task, User } from "@prisma/client";
+import { Pet, Task, User } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import CreateTaskModal from "./modals/CreateTaskModal";
 import { createTask } from "@/app/api/task/prismaActions";
@@ -133,10 +133,20 @@ const TaskDisplay = ({
 						</button>
 					</div>
 					<div>
-						{pet.tasks.length > 0 ? (
-							<TasksForASinglePetDisplay tasks={pet.tasks} />
+						{pet.tasks.filter((task: any) => {
+							return task.status !== "CANCELLED" && task.status !== "COMPLETED";
+						}).length > 0 ? (
+							<TasksForASinglePetDisplay
+								tasks={pet.tasks.filter((task: any) => {
+									return (
+										task.status !== "CANCELLED" && task.status !== "COMPLETED"
+									);
+								})}
+							/>
 						) : (
-							<p>No tasks available for this pet.</p>
+							<p className="text-gray-400">
+								No active tasks for {pet.name}. Good job!
+							</p>
 						)}
 					</div>
 				</div>

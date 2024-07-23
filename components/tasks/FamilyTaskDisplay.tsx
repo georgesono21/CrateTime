@@ -24,14 +24,37 @@ const FamilyTaskDisplay = () => {
 	// 	console.log(`familyTaskDisplay familyPets ${JSON.stringify(familyPets)}`);
 	// }, [familyPets]);
 
+	// useEffect(() => {
+	// 	console.log(`familyTaskDisplay families ${JSON.stringify(familyPets)}`);
+	// }, [families]);
+
 	useEffect(() => {
-		console.log(`familyTaskDisplay families ${JSON.stringify(familyPets)}`);
-	}, [families]);
+		const eventSource = new EventSource(`/api/task`);
+		eventSource.onopen = (e) => {
+			console.log("task server open ready");
+		};
+		eventSource.onmessage = async (e) => {
+			console.log("onmessage");
+			// console.log(`session fetch ${JSON.stringify(session)}`);
+			await fetchData();
+		};
+
+		return () => {
+			eventSource.close();
+			console.log("EventSource connection closed");
+		};
+	}, []);
+
+	const fetchData = async () => {
+		await fetchFamilies();
+	};
 
 	const fetchFamilies = async () => {
+		// console.log(`session fetch ${JSON.stringify(session)}`);
 		if (session?.user?.id) {
 			try {
 				const response = await fetch("/api/task", {
+					cache: "no-store",
 					method: "POST", // Use POST method
 					headers: {
 						"Content-Type": "application/json",
@@ -56,11 +79,13 @@ const FamilyTaskDisplay = () => {
 			} catch (error) {
 				console.error("Failed to retrieve families:", error);
 			}
+		} else {
+			console.log("invalid session");
 		}
 	};
 
 	useEffect(() => {
-		fetchFamilies();
+		fetchData();
 	}, [session?.user.id]);
 
 	return (

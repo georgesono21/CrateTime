@@ -30,6 +30,7 @@ const PetList = () => {
 		updatedAt: new Date(),
 		familyId: "",
 		ignore: [],
+		taskIds: [],
 	});
 
 	const [isCreatePetModalOpen, setCreatePetModalOpen] =
@@ -68,11 +69,13 @@ const PetList = () => {
 			updatedAt: new Date(),
 			familyId: "",
 			ignore: [],
+			taskIds: [],
 		} as Pet);
 		setSelectedFamilyId(null);
 	};
 
 	const fetchFamilies = async () => {
+		// console.log(`session fetch ${JSON.stringify(session)}`);
 		if (session?.user?.id) {
 			try {
 				const fetchedFamilies = await retrieveUserFamilies(session.user.id);
@@ -112,6 +115,7 @@ const PetList = () => {
 		};
 		eventSource.onmessage = async (e) => {
 			console.log("onmessage");
+
 			fetchData();
 		};
 
@@ -138,6 +142,7 @@ const PetList = () => {
 			updatedAt: new Date(),
 			familyId: "",
 			ignore: [],
+			taskIds: [],
 		} as Pet);
 
 		setSelectedFamilyId(null);
@@ -164,6 +169,7 @@ const PetList = () => {
 			updatedAt: new Date(),
 			familyId: "",
 			ignore: [],
+			taskIds: [],
 		} as Pet);
 		setSelectedFamilyId(null);
 	};
@@ -179,7 +185,7 @@ const PetList = () => {
 					>
 						<h2 className="text-xl font-semibold mb-2">{family.name}</h2>
 						<div className="text-sm mb-2">
-							Admin:{" "}
+							Admin:
 							<MiniUserProfileView
 								user={
 									familyMembers[family.id]?.find(

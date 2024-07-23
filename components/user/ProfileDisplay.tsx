@@ -176,7 +176,6 @@ const ProfileDisplay = () => {
 					closeModals();
 				}}
 				onChange={handleInputChange}
-				user={user}
 				setEditedValue={setEditedValue}
 			/>
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Pet } from "@prisma/client";
 
 const PetPhotoNameDisplay = ({ pet }: { pet: Pet }) => {
-	console.log(pet);
+	// console.log(pet);
 	return (
 		// <Link href={`/pets/${pet.id}`}>
 		<div className="flex items-center m-3">

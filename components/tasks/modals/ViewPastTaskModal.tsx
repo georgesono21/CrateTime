@@ -1,7 +1,32 @@
 import React, { useEffect, useState } from "react";
-import Modal from "@/components/family/modals/Modal";
 import { Task, User } from "@prisma/client";
-import TaskForASinglePet from "../TaskForASinglePet";
+import PastTaskForASinglePet from "../PastTaskForASinglePet";
+
+const Modal = ({
+	isOpen,
+	onClose,
+	children,
+}: {
+	isOpen: any;
+	onClose: any;
+	children: React.ReactNode;
+}) => {
+	return (
+		isOpen && (
+			<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 overflow-y-auto">
+				<div className="mt-20 p-5 bg-base-100 rounded-lg shadow-lg relative max-h-full w-full md:w-auto overflow-y-auto">
+					<button
+						className="absolute top-2 right-2 text-xl font-bold"
+						onClick={onClose}
+					>
+						&times;
+					</button>
+					{children}
+				</div>
+			</div>
+		)
+	);
+};
 
 const ViewPastTaskModal = ({
 	isOpen,
@@ -12,9 +37,20 @@ const ViewPastTaskModal = ({
 	onClose: () => void;
 	pastTasks: Task[];
 }) => {
+	const [shownPastTasks, setShownPastTasks] = useState<Task[]>([]);
+
+	useEffect(() => {
+		const newPastTasks = pastTasks.filter((task) => {
+			return task.status === "COMPLETED" || task.status === "CANCELLED";
+		});
+		// console.log(JSON.stringify(newPastTasks));
+		setShownPastTasks(newPastTasks);
+	}, [pastTasks]);
+
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
-			<TaskForASinglePet tasks={pastTasks} />
+			<h1 className="text-center text-2xl font-bold mb-5">Past Tasks</h1>
+			<PastTaskForASinglePet tasks={shownPastTasks} />
 		</Modal>
 	);
 };
