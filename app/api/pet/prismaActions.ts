@@ -337,6 +337,12 @@ export async function deletePet(
         },
     });
 
+    for (const taskId of pet.taskIds){
+        await prisma.task.delete({
+            where: {id: taskId}
+        })
+    }
+
     await prisma.pet.delete({
         where: {id: pet.id}
     })

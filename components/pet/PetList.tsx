@@ -198,16 +198,7 @@ const PetList = () => {
 								}
 							/>
 						</div>
-						{/* <h3 className="font-semibold mb-2">Members:</h3>
-						<ul>
-							{familyMembers[family.id]?.map((member) => (
-								<li key={member.id} className="flex gap-4">
-									<p>
-										{member.name} ({member.email})
-									</p>
-								</li>
-							))}
-						</ul> */}
+
 						<h3 className="font-semibold my-2">Pets:</h3>
 						<ul>
 							{!familyPets[family.id] ||

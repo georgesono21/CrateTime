@@ -1,8 +1,7 @@
 import { Family, Pet, User } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import MiniUserProfileView from "../user/MiniUserProfileView";
-import PetPhotoNameDisplay from "../pet/PetPhotoNameDisplay";
+
 import TaskDisplay from "./TaskDisplay";
 
 const FamilyTaskDisplay = () => {

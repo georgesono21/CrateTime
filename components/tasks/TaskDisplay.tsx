@@ -106,31 +106,33 @@ const TaskDisplay = ({
 						<h1 className="text-xl">
 							<PetPhotoNameDisplayMongo pet={pet} />
 						</h1>
-						<button
-							className="btn ml-10 btn-primary dark:text-white"
-							onClick={() => {
-								setCreateTaskModalOpen(true);
+						<div>
+							<button
+								className="btn ml-10 sm:mb-5  btn-primary dark:text-white"
+								onClick={() => {
+									setCreateTaskModalOpen(true);
 
-								let newNewTask = {
-									...newTask,
-									petId: pet._id,
-									familyId: familyId,
-									creatorId: uId,
-								};
-								setNewTask(newNewTask);
-							}}
-						>
-							Create new task
-						</button>
-						<button
-							className="btn ml-10 btn-secondary dark:text-white"
-							onClick={() => {
-								setSelectedPetTasks(pet.tasks);
-								setViewPastTaskModalOpen(true);
-							}}
-						>
-							View Past Tasks
-						</button>
+									let newNewTask = {
+										...newTask,
+										petId: pet._id,
+										familyId: familyId,
+										creatorId: uId,
+									};
+									setNewTask(newNewTask);
+								}}
+							>
+								Create new task
+							</button>
+							<button
+								className="btn ml-10 btn-secondary dark:text-white"
+								onClick={() => {
+									setSelectedPetTasks(pet.tasks);
+									setViewPastTaskModalOpen(true);
+								}}
+							>
+								View Past Tasks
+							</button>
+						</div>
 					</div>
 					<div>
 						{pet.tasks.filter((task: any) => {
@@ -144,7 +146,7 @@ const TaskDisplay = ({
 								})}
 							/>
 						) : (
-							<p className="text-gray-400">
+							<p className="text-gray-400 text-center">
 								No active tasks for {pet.name}. Good job!
 							</p>
 						)}

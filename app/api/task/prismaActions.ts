@@ -82,6 +82,28 @@ export async function updateTaskStatus(task: any, status: TaskStatus){
 
 }
 
+export async function updateTaskPhoto(task: any, url: string){
+    console.log(`cancelTask ${JSON.stringify(task)}`)
+
+    const selectedTask = await prisma.task.findUnique({
+        where: {id: task._id}
+    })
+
+    if (!selectedTask){
+          throw new Error(`Family with id ${task._id} does not exist.`);
+    } 
+
+    await prisma.task.update({
+        where: {id: task._id},
+        data: {
+            image: {
+                set: url
+            }
+        }
+    })
+
+}
+
 
 
 
@@ -132,6 +154,70 @@ export async function createTask(petId: string, familyId:string, userId:string, 
             provideProof: taskInfo.provideProof
         }
     });
+
+    await prisma.pet.update({
+        where: { id: petId },
+        data: {
+            tasks: {
+                connect: { id: createdTask.id}
+            }
+        }
+    });
+
+
+
+}
+
+
+
+export async function editTask(petId: string, familyId:string, userId:string, creatorId:string, taskInfo: any){
+
+
+    const family = await prisma.family.findUnique({
+        where: { id: familyId }
+    });
+
+    const user = await prisma.user.findUnique({
+        where: { id: userId }
+    });
+
+    const creator =  await prisma.user.findUnique({
+        where: { id: creatorId }
+    });
+
+
+    const pet = await prisma.pet.findUnique({
+        where: { id: petId }
+    });
+
+    
+    if (!family) {
+        throw new Error(`Family with id ${familyId} does not exist.`);
+    }
+
+    if (!user) {
+        throw new Error(`User with id ${userId} does not exist`);
+    }
+
+    if (!pet) {
+        throw new Error(`Pet with id ${userId} does not exist`);
+    }
+
+  
+   const createdTask = await prisma.task.update({
+  where: { id: taskInfo._id },
+  data: {
+    title: taskInfo.title, // No need for { set: taskInfo.title } for simple string fields
+    desc: taskInfo.desc,
+    petId: taskInfo.petId,
+    userId: taskInfo.userId,
+    familyId: taskInfo.familyId,
+    status: taskInfo.status,
+    creatorId: taskInfo.creatorId,
+    deadline: parseDate(taskInfo.deadline),
+    provideProof: taskInfo.provideProof
+  }
+});
 
     await prisma.pet.update({
         where: { id: petId },

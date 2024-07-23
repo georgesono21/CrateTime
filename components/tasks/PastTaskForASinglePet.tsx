@@ -24,10 +24,14 @@ const PastTaskForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 							<h2 className="text-2xl font-semibold">{task.title}</h2>
 							<p className="mb-5">{task.desc}</p>
 							<p>
-								<strong>Deadline:</strong> {task.deadline.toString()}
+								<strong>Deadline:</strong> {task.deadline}
 							</p>
 							<p>
 								<strong>Status:</strong> {task.status}
+							</p>
+							<p>
+								<strong>Photo Required:</strong>{" "}
+								{task.photoProof ? "Yes" : "No"}
 							</p>
 
 							<div className="flex mt-4">
@@ -44,11 +48,13 @@ const PastTaskForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 							{task.provideProof && (
 								<>
 									<h1>Photo of Completion</h1>
-									<img
-										src={task.image}
-										alt="Invalid Photo"
-										className="w-16 h-16 object-cover"
-									/>
+									<a href={task.image}>
+										<img
+											src={task.image}
+											alt="Invalid Photo"
+											className="w-16 h-16 object-cover"
+										/>
+									</a>
 								</>
 							)}
 
@@ -88,14 +94,15 @@ const PastTaskForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 							<h2 className="text-2xl font-semibold">{task.title}</h2>
 							<p className="mb-5">{task.desc}</p>
 							<p>
-								<strong>Deadline:</strong> {task.deadline.toString()}
+								<strong>Deadline:</strong> {task.deadline}
 							</p>
 							<p>
 								<strong>Status:</strong> {task.status}
 							</p>
 
 							<p>
-								<strong>Photo Required:</strong> {task.status}
+								<strong>Photo Required:</strong>{" "}
+								{task.photoProof ? "Yes" : "No"}
 							</p>
 
 							<div className="flex mt-4">
