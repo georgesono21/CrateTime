@@ -117,7 +117,7 @@ const EditTaskModal = ({
 
 			<h1>Deadline</h1>
 			<input
-				type="date"
+				type="datetime-local"
 				name="deadline"
 				value={newTask.deadline ? formatDate(newTask.deadline) : ""}
 				onChange={handleChange}

@@ -84,6 +84,10 @@ const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 		return;
 	};
 
+	const prettyPrintDeadline = (deadline: Date) => {
+		return deadline.toLocaleString();
+	};
+
 	return (
 		<div className="flex flex-col space-y-4">
 			{tasks.map((task, index) => (
@@ -95,7 +99,8 @@ const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 						<h2 className="text-2xl font-semibold">{task.title}</h2>
 						<p className="mb-5">{task.desc}</p>
 						<p>
-							<strong>Deadline:</strong> {task.deadline}
+							<strong>Deadline:</strong>{" "}
+							{prettyPrintDeadline(new Date(task.deadline))}
 						</p>
 						<p>
 							<strong>Status:</strong> {task.status}

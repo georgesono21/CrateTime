@@ -86,7 +86,7 @@ const FamilyTaskDisplay = () => {
 	}, [session?.user?.id]);
 
 	return (
-		<div className="m-8 flex-col justify-center">
+		<div className="my-8 flex-col justify-center">
 			<div className="flex-wrap gap-3">
 				{families.length === 0 ? <h1>No Families Yet...</h1> : null}
 				{families.map((family) => (
