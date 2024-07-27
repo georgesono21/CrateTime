@@ -1,6 +1,8 @@
 "use client";
 
+import CrateTime from "@/components/pet/CrateTimeDisplay";
 import FamilyTaskDisplay from "@/components/tasks/FamilyTaskDisplay";
+import { crateTimeToday } from "@/mockData";
 
 export default function Home() {
 	// const session = useSession();
@@ -15,7 +17,6 @@ export default function Home() {
 
 	return (
 		<div className="bg-base-300 flex min-h-screen flex-col p-10 items-center">
-			<h1 className="text-3xl font-semibold mb-1 ">Task Overview</h1>
 			<FamilyTaskDisplay />
 		</div>
 	);

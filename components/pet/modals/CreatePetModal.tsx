@@ -17,10 +17,16 @@ const CreatePetModal = ({
 }) => {
 	const [file, setFile] = useState<File | null>(null);
 	const [uploading, setUploading] = useState(false);
+	const [errors, setErrors] = useState<{ name?: string; dateOfBirth?: string }>(
+		{}
+	);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
-		setNewPet((prev: Pet) => ({ ...prev, [name]: value }));
+		setNewPet((prev: Pet) => ({
+			...prev,
+			[name]: name === "timeOutsideGoalInHours" ? Number(value) : value,
+		}));
 	};
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +35,26 @@ const CreatePetModal = ({
 		}
 	};
 
+	useEffect(() => {
+		console.log(`newPet ${JSON.stringify(newPet)}`);
+	}, [newPet]);
+
+	const validate = () => {
+		const errors: { name?: string; dateOfBirth?: string } = {};
+		if (!newPet.name) {
+			errors.name = "Pet name is required.";
+		}
+		if (!newPet.dateOfBirth) {
+			errors.dateOfBirth = "Date of birth is required.";
+		}
+		setErrors(errors);
+		return Object.keys(errors).length === 0;
+	};
+
 	const handleSubmit = async () => {
+		if (!validate()) {
+			return;
+		}
 		if (file) {
 			setUploading(true);
 			const formData = new FormData();
@@ -88,6 +113,7 @@ const CreatePetModal = ({
 				className="border p-2 mb-4 w-full"
 				placeholder="Pet Name"
 			/>
+			{errors.name && <p className="text-red-500">{errors.name}</p>}
 			<h1>Pet Photo:</h1>
 			<input
 				type="file"
@@ -105,6 +131,21 @@ const CreatePetModal = ({
 				className="border p-2 mb-4 w-full"
 				placeholder="Date of Birth"
 			/>
+			{errors.dateOfBirth && (
+				<p className="text-red-500">{errors.dateOfBirth}</p>
+			)}
+
+			<h1>Goal time for {newPet.name} to be outside (in hours)</h1>
+			<input
+				type="number"
+				name="timeOutsideGoalInHours"
+				value={newPet.timeOutsideGoalInHours || 0}
+				onChange={handleChange}
+				className="border p-2 mb-4 w-full"
+				min="1"
+				max="12"
+			/>
+
 			<button
 				className="bg-green-500 text-white px-4 py-2 rounded"
 				onClick={async () => {

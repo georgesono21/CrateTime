@@ -9,8 +9,51 @@ import {
 import CompleteTaskModal from "./modals/CompleteTaskModal";
 import EditTaskModal from "./modals/EditTaskModal";
 
-const isPhotoRequired = (provideProof: Boolean) => {
+export const isPhotoRequired = (provideProof: Boolean) => {
 	return provideProof ? "Yes" : "No";
+};
+
+const prettyPrintStatus = (status: TaskStatus) => {
+	let color: string;
+	let text: string;
+
+	switch (status) {
+		case "COMPLETED":
+			color = "green";
+			text = "Completed";
+			break;
+		case "OPEN":
+			color = "blue";
+			text = "Open";
+			break;
+		case "IN_PROGRESS":
+			color = "orange";
+			text = "In Progress";
+			break;
+		case "CANCELLED":
+			color = "red";
+			text = "Cancelled";
+			break;
+		default:
+			color = "gray";
+			text = "Unknown Status";
+			break;
+	}
+
+	return <div style={{ color }}>{text}</div>;
+};
+
+export const TaskStatusComponent = ({ status }: { status: TaskStatus }) => {
+	return (
+		<div className="flex-row flex gap-2">
+			<p className="font-bold"> Status:</p>
+			{prettyPrintStatus(status)}
+		</div>
+	);
+};
+
+export const prettyPrintDeadline = (deadline: Date) => {
+	return deadline.toLocaleString();
 };
 
 const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
@@ -84,10 +127,6 @@ const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 		return;
 	};
 
-	const prettyPrintDeadline = (deadline: Date) => {
-		return deadline.toLocaleString();
-	};
-
 	return (
 		<div className="flex flex-col space-y-4">
 			{tasks.map((task, index) => (
@@ -98,16 +137,20 @@ const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 					<>
 						<h2 className="text-2xl font-semibold">{task.title}</h2>
 						<p className="mb-5">{task.desc}</p>
-						<p>
-							<strong>Deadline:</strong>{" "}
+						<div>
+							<TaskStatusComponent status={task.status} />
+						</div>
+						<p className="flex gap-2">
+							<strong>Deadline:</strong>
 							{prettyPrintDeadline(new Date(task.deadline))}
 						</p>
-						<p>
-							<strong>Status:</strong> {task.status}
+						<p className="flex gap-2">
+							<strong> Suggested Time Outside:</strong>
+							{task.suggestedTimeOutside} minutes
 						</p>
 
-						<p>
-							<strong>Photo Required:</strong>{" "}
+						<p className="flex gap-2">
+							<strong>Photo Required:</strong>
 							{isPhotoRequired(task.provideProof)}
 						</p>
 
@@ -135,12 +178,8 @@ const TasksForASinglePetDisplay = ({ tasks }: { tasks: any[] }) => {
 								<button
 									className="btn  dark:text-white dark:bg-green-600 dark:hover:bg-green-700"
 									onClick={() => {
-										if (!task.provideProof) {
-											updateTaskStatus(task, "COMPLETED");
-										} else {
-											setSelectedTask(task);
-											setCompleteTaskModalOpen(true);
-										}
+										setSelectedTask(task);
+										setCompleteTaskModalOpen(true);
 									}}
 								>
 									Complete Task!

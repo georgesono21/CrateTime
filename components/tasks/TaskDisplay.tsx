@@ -7,6 +7,8 @@ import PetPhotoNameDisplay from "../pet/PetPhotoNameDisplay";
 import PetPhotoNameDisplayMongo from "../pet/PetPhotoNameDisplayMongo";
 import TasksForASinglePetDisplay from "./TaskForASinglePet";
 import ViewPastTaskModal from "./modals/ViewPastTaskModal";
+import CrateTime from "../pet/CrateTimeDisplay";
+import { crateTimeToday } from "@/mockData";
 
 const TaskDisplay = ({
 	petTasks,
@@ -36,6 +38,8 @@ const TaskDisplay = ({
 		ignore: [],
 		provideProof: false,
 		image: "",
+		timeSpentOutside: 0,
+		suggestedTimeOutside: 0,
 	});
 	const [uId, setUId] = useState("");
 
@@ -73,6 +77,8 @@ const TaskDisplay = ({
 			ignore: [],
 			provideProof: false,
 			image: "",
+			timeSpentOutside: 0,
+			suggestedTimeOutside: 0,
 		});
 		return;
 	};
@@ -95,85 +101,92 @@ const TaskDisplay = ({
 			ignore: [],
 			provideProof: false,
 			image: "",
+			timeSpentOutside: 0,
+			suggestedTimeOutside: 0,
 		});
 	};
 
 	return (
-		<div className="flex flex-col space-y-4">
-			{petTasks.map((pet, index) => (
-				<div key={index} className=" p-4 rounded-lg shadow-md">
-					<div className="flex items-center mb-4">
-						<h1 className="text-xl">
-							<PetPhotoNameDisplayMongo pet={pet} />
-						</h1>
-						<div>
-							<button
-								className="btn ml-10 sm:mb-5  btn-primary dark:text-white"
-								onClick={() => {
-									setCreateTaskModalOpen(true);
+		<>
+			<h1 className="text-3xl font-semibold mt-8 text-center">Task Overview</h1>
+			<div className="flex flex-col">
+				{petTasks.map((pet, index) => (
+					<div key={index} className=" p-4 rounded-lg shadow-md">
+						<div className="flex items-center mb-4">
+							<h1 className="text-xl">
+								<PetPhotoNameDisplayMongo pet={pet} />
+							</h1>
+							<div>
+								<button
+									className="btn ml-10 sm:mb-5  btn-primary dark:text-white"
+									onClick={() => {
+										setCreateTaskModalOpen(true);
 
-									let newNewTask = {
-										...newTask,
-										petId: pet._id,
-										familyId: familyId,
-										creatorId: uId,
-									};
-									setNewTask(newNewTask);
-								}}
-							>
-								Create new task
-							</button>
-							<button
-								className="btn ml-10 btn-secondary dark:text-white"
-								onClick={() => {
-									setSelectedPetTasks(pet.tasks);
-									setViewPastTaskModalOpen(true);
-								}}
-							>
-								View Past Tasks
-							</button>
+										let newNewTask = {
+											...newTask,
+											petId: pet._id,
+											familyId: familyId,
+											creatorId: uId,
+										};
+										setNewTask(newNewTask);
+									}}
+								>
+									Create new task
+								</button>
+								<button
+									className="btn ml-10 btn-secondary dark:text-white"
+									onClick={() => {
+										setSelectedPetTasks(pet.tasks);
+										setViewPastTaskModalOpen(true);
+									}}
+								>
+									View Past Tasks
+								</button>
+							</div>
+						</div>
+						<div>
+							{pet.tasks.filter((task: any) => {
+								return (
+									task.status !== "CANCELLED" && task.status !== "COMPLETED"
+								);
+							}).length > 0 ? (
+								<TasksForASinglePetDisplay
+									tasks={pet.tasks.filter((task: any) => {
+										return (
+											task.status !== "CANCELLED" && task.status !== "COMPLETED"
+										);
+									})}
+								/>
+							) : (
+								<p className="text-gray-400 text-center">
+									No active tasks for {pet.name}. Good job!
+								</p>
+							)}
 						</div>
 					</div>
-					<div>
-						{pet.tasks.filter((task: any) => {
-							return task.status !== "CANCELLED" && task.status !== "COMPLETED";
-						}).length > 0 ? (
-							<TasksForASinglePetDisplay
-								tasks={pet.tasks.filter((task: any) => {
-									return (
-										task.status !== "CANCELLED" && task.status !== "COMPLETED"
-									);
-								})}
-							/>
-						) : (
-							<p className="text-gray-400 text-center">
-								No active tasks for {pet.name}. Good job!
-							</p>
-						)}
-					</div>
-				</div>
-			))}
-			<CreateTaskModal
-				isOpen={createTaskModalOpen}
-				onClose={closeModal}
-				onConfirm={() => {
-					handleCreate();
-					closeModal();
-				}}
-				setNewTask={setNewTask}
-				newTask={newTask}
-				familyId={familyId}
-				familyMembers={familyMembers}
-			/>
-			<ViewPastTaskModal
-				isOpen={viewPastTaskModalOpen}
-				onClose={closeModal}
-				// pastTasks={selectedPetTasks.filter((task) => {
-				// 	task.status == "COMPLETED" || task.status == "CANCELLED";
-				// })}
-				pastTasks={selectedPetTasks}
-			/>
-		</div>
+				))}
+				<CreateTaskModal
+					isOpen={createTaskModalOpen}
+					onClose={closeModal}
+					onConfirm={() => {
+						handleCreate();
+						closeModal();
+					}}
+					setNewTask={setNewTask}
+					newTask={newTask}
+					familyId={familyId}
+					familyMembers={familyMembers}
+				/>
+				<ViewPastTaskModal
+					isOpen={viewPastTaskModalOpen}
+					onClose={closeModal}
+					// pastTasks={selectedPetTasks.filter((task) => {
+					// 	task.status == "COMPLETED" || task.status == "CANCELLED";
+					// })}
+					pastTasks={selectedPetTasks}
+				/>
+			</div>
+		</>
 	);
 };
 

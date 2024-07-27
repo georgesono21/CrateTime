@@ -1,16 +1,46 @@
 // // import { Pet } from "@/components/models";
 
-// export const crateTimeToday = [
-//     {name: "Chloe",
-//     crateTimeTodayInMinutes: 100,
-//     maxCrateTimeInMinutes: 60 * 9, //9 hours
-//     },
-//     {name: "Titan",
-//     crateTimeTodayInMinutes: 0,
-//     timeOutsideInMinutes: 200,
-//     maxCrateTimeInMinutes: 60 * 9,
-//     }
-// ]
+export const crateTimeToday = [
+    {name: "Chloe",
+    crateTimeTodayInMinutes: 100,
+    maxCrateTimeInMinutes: 60 * 9, //9 hours
+    },
+    {name: "Titan",
+    crateTimeTodayInMinutes: 0,
+    timeOutsideInMinutes: 200,
+    maxCrateTimeInMinutes: 60 * 9,
+    },
+    {name: "Titan",
+    crateTimeTodayInMinutes: 0,
+    timeOutsideInMinutes: 200,
+    maxCrateTimeInMinutes: 60 * 9,
+    },
+    // {name: "Titan",
+    // crateTimeTodayInMinutes: 0,
+    // timeOutsideInMinutes: 200,
+    // maxCrateTimeInMinutes: 60 * 9,
+    // },
+    // {name: "Titan",
+    // crateTimeTodayInMinutes: 0,
+    // timeOutsideInMinutes: 200,
+    // maxCrateTimeInMinutes: 60 * 9,
+    // },
+    // {name: "Titan",
+    // crateTimeTodayInMinutes: 0,
+    // timeOutsideInMinutes: 200,
+    // maxCrateTimeInMinutes: 60 * 9,
+    // },
+    // {name: "Titan",
+    // crateTimeTodayInMinutes: 0,
+    // timeOutsideInMinutes: 200,
+    // maxCrateTimeInMinutes: 60 * 9,
+    // },
+    // {name: "Titan",
+    // crateTimeTodayInMinutes: 0,
+    // timeOutsideInMinutes: 200,
+    // maxCrateTimeInMinutes: 60 * 9,
+    // }
+]
 // export const petTasks = [
 //     {
 //         id: "1",

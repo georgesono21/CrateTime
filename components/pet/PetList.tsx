@@ -31,6 +31,8 @@ const PetList = () => {
 		familyId: "",
 		ignore: [],
 		taskIds: [],
+		timeOutsideGoalInHours: 0,
+		timeOutsideLog: [],
 	});
 
 	const [isCreatePetModalOpen, setCreatePetModalOpen] =
@@ -70,6 +72,8 @@ const PetList = () => {
 			familyId: "",
 			ignore: [],
 			taskIds: [],
+			timeOutsideGoalInHours: 0,
+			timeOutsideLog: [],
 		} as Pet);
 		setSelectedFamilyId(null);
 	};
@@ -143,6 +147,8 @@ const PetList = () => {
 			familyId: "",
 			ignore: [],
 			taskIds: [],
+			timeOutsideGoalInHours: 0,
+			timeOutsideLog: [],
 		} as Pet);
 
 		setSelectedFamilyId(null);
@@ -170,6 +176,8 @@ const PetList = () => {
 			familyId: "",
 			ignore: [],
 			taskIds: [],
+			timeOutsideGoalInHours: 0,
+			timeOutsideLog: [],
 		} as Pet);
 		setSelectedFamilyId(null);
 	};

@@ -4,7 +4,9 @@ import { Task, User } from "@prisma/client";
 import {
 	updateTaskPhoto,
 	updateTaskStatus,
+	updateTaskTimeSpentOutside,
 } from "@/app/api/task/prismaActions";
+import { updateTotalTimeOutsidePet } from "@/app/api/pet/prismaActions";
 
 const CompleteTaskModal = ({
 	isOpen,
@@ -22,6 +24,7 @@ const CompleteTaskModal = ({
 	const [file, setFile] = useState<File | null>(null);
 	const [uploading, setUploading] = useState(false);
 	const [isUploaded, setIsUploaded] = useState(true);
+	const [timeSpent, setTimeSpent] = useState(0);
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -43,7 +46,22 @@ const CompleteTaskModal = ({
 		}
 	};
 
+	const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setTimeSpent(Number(e.target.value));
+		setNewTask((prev: Task) => ({
+			...prev,
+			timeSpent: Number(e.target.value),
+		}));
+	};
+
 	const handleSubmit = async () => {
+		if (!newTask.provideProof) {
+			updateTaskStatus(newTask, "COMPLETED");
+			updateTaskTimeSpentOutside(newTask, timeSpent);
+			onClose();
+			return;
+		}
+
 		if (file) {
 			setUploading(true);
 			const formData = new FormData();
@@ -61,7 +79,9 @@ const CompleteTaskModal = ({
 				task.image = data.s3Url;
 				setNewTask(task);
 				updateTaskPhoto(task, data.s3Url);
-				updateTaskStatus(task, "COMPLETED");
+				updateTaskStatus(newTask, "COMPLETED");
+				updateTaskTimeSpentOutside(newTask, timeSpent);
+
 				onClose();
 				setFile(null);
 				setIsUploaded(true);
@@ -92,13 +112,27 @@ const CompleteTaskModal = ({
 				</p>
 			)}
 
-			<h1>Pet Photo:</h1>
+			{newTask.provideProof && (
+				<>
+					<h1>Proof of Completion (photo):</h1>
+					<input
+						type="file"
+						name="image"
+						onChange={handleFileChange}
+						className="border p-2 mb-4 w-full"
+						accept="image/*"
+					/>
+				</>
+			)}
+			<h1>Time Spent Outside (in minutes):</h1>
+
 			<input
-				type="file"
-				name="image"
-				onChange={handleFileChange}
+				type="number"
+				name="timeSpent"
+				value={timeSpent}
+				onChange={handleTimeChange}
 				className="border p-2 mb-4 w-full"
-				accept="image/*"
+				min="0"
 			/>
 
 			<button
@@ -106,7 +140,7 @@ const CompleteTaskModal = ({
 				onClick={handleSubmit}
 				disabled={uploading}
 			>
-				Submit Photo and Finish Task
+				{newTask.provideProof ? "Submit Photo and " : ""} Finish Task
 			</button>
 		</Modal>
 	);

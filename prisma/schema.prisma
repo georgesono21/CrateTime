@@ -46,8 +46,10 @@ model Pet {
 
   Family Family @relation("owner", fields: [familyId], references: [id])
 
-  ignore String[] @default([]) @db.ObjectId
-  family Family[] @relation("pets", fields: [ignore], references: [id])
+  ignore                 String[] @default([]) @db.ObjectId
+  family                 Family[] @relation("pets", fields: [ignore], references: [id])
+  timeOutsideGoalInHours Int      @default(0)
+  timeOutsideLog         String[] @default([])
 }
 
 enum TaskStatus {
@@ -58,19 +60,21 @@ enum TaskStatus {
 }
 
 model Task {
-  id           String     @id @default(auto()) @map("_id") @db.ObjectId
-  title        String
-  desc         String     @default("")
-  petId        String     @db.ObjectId
-  userId       String     @db.ObjectId
-  familyId     String     @db.ObjectId
-  status       TaskStatus
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  deadline     DateTime
-  creatorId    String     @db.ObjectId
-  provideProof Boolean
-  image        String?
+  id                   String     @id @default(auto()) @map("_id") @db.ObjectId
+  title                String
+  desc                 String     @default("")
+  petId                String     @db.ObjectId
+  userId               String     @db.ObjectId
+  familyId             String     @db.ObjectId
+  status               TaskStatus
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  deadline             DateTime
+  creatorId            String     @db.ObjectId
+  provideProof         Boolean
+  image                String?
+  timeSpentOutside     Int        @default(0)
+  suggestedTimeOutside Int        @default(0)
 
   ignore String[] @default([]) @db.ObjectId
   pets   Pet[]    @relation("tasks", fields: [ignore], references: [id])

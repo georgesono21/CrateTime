@@ -2,6 +2,7 @@
 
 import prisma from "@/app/libs/prismadb";
 import { Family, Task, TaskStatus } from "@prisma/client";
+import { updateTotalTimeOutsidePet } from "../pet/prismaActions";
 
  const parseDate = (date: string | Date): Date => {
     if (typeof date === "string") {
@@ -82,6 +83,30 @@ export async function updateTaskStatus(task: any, status: TaskStatus){
 
 }
 
+export async function updateTaskTimeSpentOutside(task: any, timeSpentOutside: number){
+
+    const selectedTask = await prisma.task.findUnique({
+        where: {id: task._id}
+    })
+
+    if (!selectedTask){
+          throw new Error(`Family with id ${task._id} does not exist.`);
+    } 
+
+    await prisma.task.update({
+        where: {id: task._id},
+        data: {
+            timeSpentOutside: {
+                set: timeSpentOutside
+            }
+        }
+    })
+
+    await updateTotalTimeOutsidePet(task.petId, timeSpentOutside);
+    
+
+}
+
 export async function updateTaskPhoto(task: any, url: string){
     console.log(`cancelTask ${JSON.stringify(task)}`)
 
@@ -151,7 +176,8 @@ export async function createTask(petId: string, familyId:string, userId:string, 
             status: "OPEN",
             creatorId: taskInfo.creatorId,
             deadline: parseDate(taskInfo.deadline),
-            provideProof: taskInfo.provideProof
+            provideProof: taskInfo.provideProof,
+            suggestedTimeOutside: taskInfo.suggestedTimeOutside
         }
     });
 

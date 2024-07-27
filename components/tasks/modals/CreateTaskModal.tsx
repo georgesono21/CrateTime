@@ -23,11 +23,9 @@ const CreateTaskModal = ({
 	const [isValidDeadline, setIsValidDeadline] = useState(true);
 	const [isTitleValid, setIsTitleValid] = useState(true);
 
-	// useEffect(() => {
-	// 	console.log(
-	// 		`createtaskmodal familyMembers ${JSON.stringify(familyMembers)}`
-	// 	);
-	// }, [familyMembers]);
+	useEffect(() => {
+		console.log(`createtaskmodal newTask ${JSON.stringify(newTask)}`);
+	}, [newTask]);
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -40,6 +38,11 @@ const CreateTaskModal = ({
 			setNewTask((prev: Task) => ({
 				...prev,
 				[name]: checked,
+			}));
+		} else if (type == "number") {
+			setNewTask((prev: Task) => ({
+				...prev,
+				[name]: Number(value),
 			}));
 		} else {
 			setNewTask((prev: Task) => ({
@@ -141,6 +144,17 @@ const CreateTaskModal = ({
 			{!isAssigneeSelected && (
 				<p className="text-red-500">Please select an assignee.</p>
 			)}
+
+			<h1>Suggested Time Outside (in minutes):</h1>
+
+			<input
+				type="number"
+				name="suggestedTimeOutside"
+				value={newTask.suggestedTimeOutside}
+				onChange={handleChange}
+				className="border p-2 mb-4 w-full"
+				min="0"
+			/>
 			<div>
 				<div className="flex items-center ">
 					<h1 className="mr-5 text-center">Provide Proof?</h1>

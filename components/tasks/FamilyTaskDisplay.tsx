@@ -2,9 +2,11 @@ import { Family, Pet, User } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import TaskDisplay from "./TaskDisplay";
+import CrateTime from "../pet/CrateTimeDisplay";
+import { crateTimeToday } from "@/mockData";
 
 // Define types for MongoDB family data
-interface MongoFamily {
+export interface MongoFamily {
 	_id: string;
 	name: string;
 	image: string | null;
@@ -42,6 +44,9 @@ const FamilyTaskDisplay = () => {
 			console.log("EventSource connection closed");
 		};
 	}, []);
+	const today = () => {
+		return new Date().toISOString().split("T")[0];
+	};
 
 	const fetchData = async () => {
 		await fetchFamilies();
@@ -91,12 +96,18 @@ const FamilyTaskDisplay = () => {
 				{families.length === 0 ? <h1>No Families Yet...</h1> : null}
 				{families.map((family) => (
 					<div
-						className="border border-color p-4 mb-4 rounded-lg shadow-sm"
+						className="border  border-color p-4 mb-4 rounded-lg shadow-sm"
 						key={family._id}
 					>
-						<h2 className="text-3xl font-semibold mb-2 text-center">
+						<h2 className="text-3xl underline font-semibold mb-8 text-center">
 							{family.name}
 						</h2>
+
+						<h1 className="text-3xl font-semibold my-4 text-center ">
+							Pet Time Outside{" "}
+							<p className="text-xs font-normal"> for {`(${today()})`}</p>
+						</h1>
+						<CrateTime pets={family.pets} />
 
 						<ul>
 							<TaskDisplay

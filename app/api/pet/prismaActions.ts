@@ -1,6 +1,7 @@
 'use server';
 
 import prisma from "@/app/libs/prismadb";
+import { PutObjectRetentionCommand } from "@aws-sdk/client-s3";
 import { Family, Pet } from "@prisma/client";
 
 
@@ -11,6 +12,48 @@ import { Family, Pet } from "@prisma/client";
       return date;
     }
   };
+
+
+
+export async function updateTotalTimeOutsidePet(petId: string, timeOutside: number) {
+    // Fetch the pet and user from the database
+    const pet = await prisma.pet.findUnique({
+        where: { id: petId }
+    });
+
+    if (!pet) {
+        throw new Error(`Pet with id ${petId} does not exist`);
+    }
+
+    console.log("updateTotalTimeOutside pet: ", JSON.stringify(pet));
+
+    // Get the current date in YYYY-MM-DD format
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    // Initialize timeOutsideLog or set to empty array if not present
+    let timeOutsideLog = pet.timeOutsideLog ? pet.timeOutsideLog : [];
+
+    // Find the index of the entry with the current date
+    const dateIndex = timeOutsideLog.findIndex(log => log.startsWith(currentDate));
+
+    if (dateIndex === -1) {
+        // Current date not found, add a new entry to the top of the list
+        timeOutsideLog.unshift(`${currentDate}:${timeOutside}`);
+    } else {
+        // Current date found, update the existing entry
+        const [date, totalTime] = timeOutsideLog[dateIndex].split(":");
+        const updatedTime = parseFloat(totalTime) + timeOutside;
+        timeOutsideLog[dateIndex] = `${date}:${updatedTime}`;
+    }
+
+    // Update the pet in the database
+    await prisma.pet.update({
+        where: { id: petId },
+        data: {
+            timeOutsideLog: timeOutsideLog
+        }
+    });
+}
 
 export async function createNewPet(uId: string, familyId: string, petInfo: Pet) {
 
@@ -47,7 +90,8 @@ export async function createNewPet(uId: string, familyId: string, petInfo: Pet) 
             name: petInfo.name,
             familyId: petInfo.familyId,
             image: petInfo.image,
-            dateOfBirth: parseDate(petInfo.dateOfBirth)
+            dateOfBirth: parseDate(petInfo.dateOfBirth),
+            timeOutsideGoalInHours: petInfo.timeOutsideGoalInHours
         }
     });-
 
@@ -65,49 +109,6 @@ export async function createNewPet(uId: string, familyId: string, petInfo: Pet) 
 
     return createdPet;
 }
-
-
-// export async function editPetPhoto(uId: string, familyId: string, imageUrl: string, petInfo: Pet) {
-    
-//     const pet = await prisma.pet.findUnique({
-//         where: {id: petInfo.id}
-//     });
-
-//     const family = await prisma.family.findUnique({
-//         where: { id: familyId }
-//     });
-
-//     const user = await prisma.user.findUnique({
-//         where: { id: uId }
-//     });
-
-//     if (!family) {
-//         throw new Error(`Family with id ${familyId} does not exist.`);
-//     }
-
-//     if (!user) {
-//         throw new Error(`User with id ${uId} does not exist`);
-//     }
-
-//     if (family.adminId !== user.id) {
-//         throw new Error(`User with id ${uId} is not authorized to create pet`);
-//     }
-
-    
-//     const createdPet = await prisma.pet.update({
-//         where: {id: petInfo.id},
-//         data: {
-//             image: imageUrl,
-
-//         }
-//     });
-
-
-//     // console.log(`Pet created: ${JSON.stringify(createdPet)}`);
-
-//     return createdPet;
-// }
-
 
 export async function editPet(uId: string, familyId: string, petInfo: Pet) {
     
@@ -137,14 +138,15 @@ export async function editPet(uId: string, familyId: string, petInfo: Pet) {
 
     console.log("edit pet: ", JSON.stringify(petInfo))
     
-    
+    console.log
     const createdPet = await prisma.pet.update({
         where: {id: petInfo.id},
         data: {
             name: petInfo.name,
             familyId: petInfo.familyId,
             image: petInfo.image,
-            dateOfBirth: parseDate(petInfo.dateOfBirth)
+            dateOfBirth: parseDate(petInfo.dateOfBirth),
+            timeOutsideGoalInHours: petInfo.timeOutsideGoalInHours
 
         }
     });
