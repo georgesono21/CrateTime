@@ -113,7 +113,7 @@ const PetList = () => {
 	}, [session?.user.id]);
 
 	useEffect(() => {
-		const eventSource = new EventSource(`/api/family`);
+		const eventSource = new EventSource(`/api/pet`);
 		eventSource.onopen = (e) => {
 			console.log("pet server open ready");
 		};

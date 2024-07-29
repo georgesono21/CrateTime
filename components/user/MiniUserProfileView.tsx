@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const MiniUserProfileView = ({ user }: { user: any | undefined }) => {
 	return (
-		<Link href={`/home/profile?uid=${user?.id}`}>
+		<Link href={`/home/profile?uid=${user.id || user._id}`}>
 			<div className="flex items-center m-3">
 				<img
 					src={user?.image || ""}
